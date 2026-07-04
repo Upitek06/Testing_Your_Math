@@ -28,7 +28,6 @@ function generateAddition(numOps: number, diff: string) {
 }
 
 function generateSubtraction(numOps: number, diff: string) {
-    let nums: number[] = [];
     let rangeMin: number, rangeMax: number, decimals: number = 0;
     switch (diff) {
         case "mudah": rangeMin = 10; rangeMax = 99; break;
@@ -38,37 +37,81 @@ function generateSubtraction(numOps: number, diff: string) {
         default: rangeMin = 10; rangeMax = 99;
     }
 
-    let attempts = 0;
-    while (attempts < 200) {
-        nums = [];
-        for (let i = 0; i < numOps; i++) {
-            if (decimals > 0) nums.push(randFloat(rangeMin, rangeMax, decimals));
-            else nums.push(rand(rangeMin, rangeMax));
-        }
-        // Pastikan nums[0] >= jumlah semua angka lainnya
-        const rest = nums.slice(1).reduce((a, b) => a + b, 0);
-        if (nums[0] >= rest && nums[0] - rest >= 0) {
-            break;
-        }
-        attempts++;
+    // 1. Generate angka pertama (yang paling besar)
+    let first: number;
+    if (decimals > 0) {
+        first = randFloat(rangeMin, rangeMax, decimals);
+    } else {
+        first = rand(rangeMin, rangeMax);
     }
 
-    // Fallback jika gagal
-    if (nums.length < 2 || nums[0] < nums.slice(1).reduce((a, b) => a + b, 0)) {
-        nums = [50, 20, 10]; // contoh aman
-        if (numOps > 3) nums.push(5);
+    // 2. Generate angka-angka lain dengan total TIDAK MELEBIHI first
+    const others: number[] = [];
+    let remaining = first;
+
+    for (let i = 0; i < numOps - 1; i++) {
+        // Tentukan batas maksimum angka berikutnya
+        let maxVal = Math.min(remaining, rangeMax);
+        let minVal = (decimals > 0) ? 1 : 1; // minimal 1
+
+        // Kalau remaining kecil, paksa angka kecil
+        if (remaining < 1) {
+            if (decimals > 0) {
+                others.push(randFloat(0.1, 1, decimals));
+            } else {
+                others.push(rand(1, Math.min(rangeMax, 10)));
+            }
+            remaining -= others[others.length - 1];
+            continue;
+        }
+
+        // Generate angka
+        let num: number;
+        if (decimals > 0) {
+            num = randFloat(minVal, Math.min(maxVal, remaining), decimals);
+            // Pastikan gak lebih dari remaining
+            if (num > remaining) num = remaining;
+        } else {
+            num = rand(minVal, Math.min(maxVal, Math.floor(remaining)));
+        }
+
+        // Kalau num = 0, set ke 1
+        if (num === 0) num = 1;
+
+        others.push(num);
+        remaining -= num;
+
+        // Kalau remaining < 0, break
+        if (remaining < 0) break;
     }
 
+    // Fallback: kalau jumlah angka kurang, tambahkan angka kecil
+    while (others.length < numOps - 1) {
+        if (decimals > 0) {
+            const small = randFloat(1, Math.min(remaining, 10), decimals);
+            others.push(small);
+            remaining -= small;
+        } else {
+            const small = rand(1, Math.min(remaining, 10));
+            others.push(small);
+            remaining -= small;
+        }
+    }
+
+    // Gabungkan
+    const nums = [first, ...others];
     const answer = nums.reduce((a, b) => a - b, 0);
-    // Pastikan answer tidak negatif (tambahan)
+
+    // Kalau answer negatif (jarang terjadi), paksa perbaiki
     if (answer < 0) {
-        // swap atau adjust
-        const total = nums.reduce((a, b) => a + b, 0);
-        nums[0] = total;
-        return generateSubtraction(numOps, diff); // rekur
+        // Tambah angka pertama
+        nums[0] = nums[0] + Math.abs(answer) + 10;
+        const newAnswer = nums.reduce((a, b) => a - b, 0);
+        return { display: `${nums.join(" − ")} = ?`, answer: newAnswer };
     }
 
-    return { display: `${nums.join(" − ")} = ?`, answer };
+    const display = nums.join(" − ");
+    return { display: `${display} = ?`, answer };
 }
 
 function generateMultiplication(numOps: number, diff: string) {
