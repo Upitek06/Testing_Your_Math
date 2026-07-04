@@ -37,70 +37,76 @@ function generateSubtraction(numOps: number, diff: string) {
         default: rangeMin = 10; rangeMax = 99;
     }
 
-    // Helper: generate angka
-    const randNum = (min: number, max: number): number => {
-        if (decimals > 0) {
-            return randFloat(min, max, decimals);
-        } else {
-            return rand(Math.ceil(min), Math.floor(max));
-        }
-    };
-
-    // 1. Generate FIRST (positif, besar)
-    let first = randNum(rangeMin, rangeMax);
-
-    // 2. Tentukan total pengurang: antara (numOps-1)*1 dan first - 1 (agar hasil minimal 1)
-    const minPart = decimals > 0 ? 0.1 : 1;
-    const minTotal = (numOps - 1) * minPart;
-    const maxTotal = Math.max(first - minPart, minTotal); // biar gak negatif
-
-    let totalSubtract: number;
-    if (maxTotal < minTotal) {
-        // Jika range tidak valid, naikkan first
-        first = randNum(rangeMin * 2, rangeMax * 2);
-        totalSubtract = randNum(minTotal, Math.max(first - minPart, minTotal));
+    // 1. Generate angka pertama (yang akan dikurangi)
+    let first: number;
+    if (decimals > 0) {
+        first = randFloat(rangeMin, rangeMax, decimals);
     } else {
-        totalSubtract = randNum(minTotal, Math.min(maxTotal, first - minPart));
+        first = rand(rangeMin, rangeMax);
     }
 
-    // 3. Bagi totalSubtract menjadi (numOps-1) bagian (semua > 0)
+    // 2. Tentukan total pengurang (harus lebih kecil dari first)
+    let maxSubtract = first;
+    // Pastikan minimal 1 (atau 0.1 jika desimal)
+    const minVal = decimals > 0 ? 0.1 : 1;
+    // Total pengurang di antara minVal * (numOps-1) dan maxSubtract * 0.9 (agar tidak terlalu besar)
+    let maxTotal = Math.min(maxSubtract * 0.9, first - (numOps - 1) * minVal);
+    if (maxTotal < (numOps - 1) * minVal) {
+        // Jika terlalu kecil, kita paksa angka pertama lebih besar
+        if (decimals > 0) {
+            first = randFloat(rangeMin * 2, rangeMax * 2, decimals);
+        } else {
+            first = rand(rangeMin * 2, rangeMax * 2);
+        }
+        maxTotal = first * 0.9;
+    }
+
+    let totalSubtract: number;
+    if (decimals > 0) {
+        totalSubtract = randFloat((numOps - 1) * minVal, maxTotal, decimals);
+    } else {
+        totalSubtract = rand(Math.ceil((numOps - 1) * minVal), Math.floor(maxTotal));
+    }
+
+    // 3. Bagi totalSubtract menjadi (numOps - 1) bagian
     let parts: number[] = [];
     let remaining = totalSubtract;
     for (let i = 0; i < numOps - 1; i++) {
-        let maxPart = remaining - (numOps - 2 - i) * minPart;
-        if (maxPart < minPart) maxPart = minPart;
-        let part = randNum(minPart, maxPart);
+        let maxPart = remaining - (numOps - 2 - i) * minVal;
+        if (maxPart < minVal) maxPart = minVal;
+        let part: number;
+        if (decimals > 0) {
+            part = randFloat(minVal, maxPart, decimals);
+        } else {
+            part = rand(Math.ceil(minVal), Math.floor(maxPart));
+        }
+        // Pastikan part tidak melebihi remaining
         if (part > remaining) part = remaining;
         parts.push(part);
         remaining -= part;
     }
-    // Jika ada sisa (karena pembulatan), tambahkan ke bagian terakhir
+    // Jika masih ada sisa (karena pembulatan), tambahkan ke bagian terakhir
     if (remaining > 0) {
         parts[parts.length - 1] += remaining;
     }
 
-    // 4. Susun nums
+    // 4. Susun angka
     const nums = [first, ...parts];
-    // Hitung jawaban
-    const answer = nums.reduce((a, b) => a - b, 0);
+    const answer = nums.reduce((a, b) => a - b);
 
-    // 5. Pastikan answer > 0, jika tidak, tambah first
-    if (answer <= 0) {
+    // 5. Jika answer negatif (sangat jarang), kita naikkan first
+    if (answer < 0) {
         first += Math.abs(answer) + 10;
         nums[0] = first;
-        const newAnswer = nums.reduce((a, b) => a - b, 0);
-        // Rekursi sekali (aman)
-        return generateSubtraction(numOps, diff);
+        const newAnswer = nums.reduce((a, b) => a - b);
+        return { display: `${nums.join(" − ")} = ?`, answer: newAnswer };
     }
 
-    // 6. Format display
+    // Tampilkan dalam format yang rapi (bisa desimal)
     const display = nums.map(n => {
         if (Number.isInteger(n)) return n.toString();
-        return n.toFixed(decimals);
+        return n.toFixed(decimals || 0);
     }).join(" − ");
-
-    // 7. Log untuk debugging
-    console.log("✅ Pengurangan:", nums, "jawaban:", answer);
 
     return { display: `${display} = ?`, answer };
 }
