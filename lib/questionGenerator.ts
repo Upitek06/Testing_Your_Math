@@ -45,47 +45,34 @@ function generateSubtraction(numOps: number, diff: string) {
         first = rand(rangeMin, rangeMax);
     }
 
-    // 2. Tentukan total pengurang (harus lebih kecil dari first)
-    let maxSubtract = first;
-    // Pastikan minimal 1 (atau 0.1 jika desimal)
-    const minVal = decimals > 0 ? 0.1 : 1;
-    // Total pengurang di antara minVal * (numOps-1) dan maxSubtract * 0.9 (agar tidak terlalu besar)
-    let maxTotal = Math.min(maxSubtract * 0.9, first - (numOps - 1) * minVal);
-    if (maxTotal < (numOps - 1) * minVal) {
-        // Jika terlalu kecil, kita paksa angka pertama lebih besar
-        if (decimals > 0) {
-            first = randFloat(rangeMin * 2, rangeMax * 2, decimals);
-        } else {
-            first = rand(rangeMin * 2, rangeMax * 2);
-        }
-        maxTotal = first * 0.9;
-    }
+    // 2. Tentukan total pengurang (harus lebih kecil dari first, dan minimal 1 per angka)
+    const minPart = decimals > 0 ? 0.1 : 1;
+    const maxTotal = Math.max(first - minPart * (numOps - 1), minPart * (numOps - 1));
 
     let totalSubtract: number;
     if (decimals > 0) {
-        totalSubtract = randFloat((numOps - 1) * minVal, maxTotal, decimals);
+        totalSubtract = randFloat(minPart * (numOps - 1), maxTotal, decimals);
     } else {
-        totalSubtract = rand(Math.ceil((numOps - 1) * minVal), Math.floor(maxTotal));
+        totalSubtract = rand(Math.ceil(minPart * (numOps - 1)), Math.floor(maxTotal));
     }
 
     // 3. Bagi totalSubtract menjadi (numOps - 1) bagian
     let parts: number[] = [];
     let remaining = totalSubtract;
     for (let i = 0; i < numOps - 1; i++) {
-        let maxPart = remaining - (numOps - 2 - i) * minVal;
-        if (maxPart < minVal) maxPart = minVal;
+        let maxPart = remaining - (numOps - 2 - i) * minPart;
+        if (maxPart < minPart) maxPart = minPart;
         let part: number;
         if (decimals > 0) {
-            part = randFloat(minVal, maxPart, decimals);
+            part = randFloat(minPart, maxPart, decimals);
         } else {
-            part = rand(Math.ceil(minVal), Math.floor(maxPart));
+            part = rand(Math.ceil(minPart), Math.floor(maxPart));
         }
-        // Pastikan part tidak melebihi remaining
         if (part > remaining) part = remaining;
         parts.push(part);
         remaining -= part;
     }
-    // Jika masih ada sisa (karena pembulatan), tambahkan ke bagian terakhir
+    // Jika masih ada sisa, tambahkan ke bagian terakhir
     if (remaining > 0) {
         parts[parts.length - 1] += remaining;
     }
@@ -102,7 +89,7 @@ function generateSubtraction(numOps: number, diff: string) {
         return { display: `${nums.join(" − ")} = ?`, answer: newAnswer };
     }
 
-    // Tampilkan dalam format yang rapi (bisa desimal)
+    // Tampilkan angka dengan format yang rapi
     const display = nums.map(n => {
         if (Number.isInteger(n)) return n.toString();
         return n.toFixed(decimals || 0);
