@@ -37,8 +37,8 @@ function generateSubtraction(numOps: number, diff: string) {
         default: rangeMin = 10; rangeMax = 99;
     }
 
-    // Helper: generate angka random (integer atau float)
-    const randNum = (min: number, max: number) => {
+    // Helper: generate angka
+    const randNum = (min: number, max: number): number => {
         if (decimals > 0) {
             return randFloat(min, max, decimals);
         } else {
@@ -46,19 +46,27 @@ function generateSubtraction(numOps: number, diff: string) {
         }
     };
 
-    // 1. Generate FIRST (angka yang dikurangi)
+    // 1. Generate FIRST (positif, besar)
     let first = randNum(rangeMin, rangeMax);
 
-    // 2. Tentukan TOTAL PENGURANG (harus lebih kecil dari first, dan minimal 1 per angka)
+    // 2. Tentukan total pengurang: antara (numOps-1)*1 dan first - 1 (agar hasil minimal 1)
     const minPart = decimals > 0 ? 0.1 : 1;
-    const maxTotal = Math.max(first - minPart * (numOps - 1), minPart * (numOps - 1));
-    let totalSubtract = randNum(minPart * (numOps - 1), maxTotal);
+    const minTotal = (numOps - 1) * minPart;
+    const maxTotal = Math.max(first - minPart, minTotal); // biar gak negatif
 
-    // 3. Bagi totalSubtract menjadi (numOps-1) bagian
+    let totalSubtract: number;
+    if (maxTotal < minTotal) {
+        // Jika range tidak valid, naikkan first
+        first = randNum(rangeMin * 2, rangeMax * 2);
+        totalSubtract = randNum(minTotal, Math.max(first - minPart, minTotal));
+    } else {
+        totalSubtract = randNum(minTotal, Math.min(maxTotal, first - minPart));
+    }
+
+    // 3. Bagi totalSubtract menjadi (numOps-1) bagian (semua > 0)
     let parts: number[] = [];
     let remaining = totalSubtract;
     for (let i = 0; i < numOps - 1; i++) {
-        // Tentukan batas maksimum untuk bagian ini
         let maxPart = remaining - (numOps - 2 - i) * minPart;
         if (maxPart < minPart) maxPart = minPart;
         let part = randNum(minPart, maxPart);
@@ -66,33 +74,33 @@ function generateSubtraction(numOps: number, diff: string) {
         parts.push(part);
         remaining -= part;
     }
-    // Jika masih ada sisa karena pembulatan, tambahkan ke bagian terakhir
+    // Jika ada sisa (karena pembulatan), tambahkan ke bagian terakhir
     if (remaining > 0) {
         parts[parts.length - 1] += remaining;
     }
 
-    // 4. Susun angka
+    // 4. Susun nums
     const nums = [first, ...parts];
+    // Hitung jawaban
     const answer = nums.reduce((a, b) => a - b, 0);
 
-    // 5. VALIDASI: pastikan answer tidak negatif
-    if (answer < 0) {
-        // Naikkan first sebesar selisihnya + 10
+    // 5. Pastikan answer > 0, jika tidak, tambah first
+    if (answer <= 0) {
         first += Math.abs(answer) + 10;
         nums[0] = first;
         const newAnswer = nums.reduce((a, b) => a - b, 0);
-        // Rekursi sekali saja (aman karena kita sudah pasti)
-        return { display: `${nums.join(" − ")} = ?`, answer: newAnswer };
+        // Rekursi sekali (aman)
+        return generateSubtraction(numOps, diff);
     }
 
-    // 6. Format display (angka bulat atau desimal)
+    // 6. Format display
     const display = nums.map(n => {
         if (Number.isInteger(n)) return n.toString();
-        return n.toFixed(decimals || 0);
+        return n.toFixed(decimals);
     }).join(" − ");
 
-    // 7. Log untuk debugging (hapus kalau sudah yakin)
-    console.log("🔢 Pengurangan:", nums, "jawaban:", answer);
+    // 7. Log untuk debugging
+    console.log("✅ Pengurangan:", nums, "jawaban:", answer);
 
     return { display: `${display} = ?`, answer };
 }
