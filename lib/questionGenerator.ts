@@ -37,7 +37,7 @@ function generateSubtraction(numOps: number, diff: string) {
         default: rangeMin = 10; rangeMax = 99;
     }
 
-    // 1. Generate angka pertama (yang paling besar)
+    // 1. Generate angka pertama (yang akan dikurangi)
     let first: number;
     if (decimals > 0) {
         first = randFloat(rangeMin, rangeMax, decimals);
@@ -45,72 +45,69 @@ function generateSubtraction(numOps: number, diff: string) {
         first = rand(rangeMin, rangeMax);
     }
 
-    // 2. Generate angka-angka lain dengan total TIDAK MELEBIHI first
-    const others: number[] = [];
-    let remaining = first;
+    // 2. Tentukan total pengurang (harus lebih kecil dari first)
+    let maxSubtract = first;
+    // Pastikan minimal 1 (atau 0.1 jika desimal)
+    const minVal = decimals > 0 ? 0.1 : 1;
+    // Total pengurang di antara minVal * (numOps-1) dan maxSubtract * 0.9 (agar tidak terlalu besar)
+    let maxTotal = Math.min(maxSubtract * 0.9, first - (numOps - 1) * minVal);
+    if (maxTotal < (numOps - 1) * minVal) {
+        // Jika terlalu kecil, kita paksa angka pertama lebih besar
+        if (decimals > 0) {
+            first = randFloat(rangeMin * 2, rangeMax * 2, decimals);
+        } else {
+            first = rand(rangeMin * 2, rangeMax * 2);
+        }
+        maxTotal = first * 0.9;
+    }
 
+    let totalSubtract: number;
+    if (decimals > 0) {
+        totalSubtract = randFloat((numOps - 1) * minVal, maxTotal, decimals);
+    } else {
+        totalSubtract = rand(Math.ceil((numOps - 1) * minVal), Math.floor(maxTotal));
+    }
+
+    // 3. Bagi totalSubtract menjadi (numOps - 1) bagian
+    let parts: number[] = [];
+    let remaining = totalSubtract;
     for (let i = 0; i < numOps - 1; i++) {
-        // Tentukan batas maksimum angka berikutnya
-        let maxVal = Math.min(remaining, rangeMax);
-        let minVal = (decimals > 0) ? 1 : 1; // minimal 1
-
-        // Kalau remaining kecil, paksa angka kecil
-        if (remaining < 1) {
-            if (decimals > 0) {
-                others.push(randFloat(0.1, 1, decimals));
-            } else {
-                others.push(rand(1, Math.min(rangeMax, 10)));
-            }
-            remaining -= others[others.length - 1];
-            continue;
-        }
-
-        // Generate angka
-        let num: number;
+        let maxPart = remaining - (numOps - 2 - i) * minVal;
+        if (maxPart < minVal) maxPart = minVal;
+        let part: number;
         if (decimals > 0) {
-            num = randFloat(minVal, Math.min(maxVal, remaining), decimals);
-            // Pastikan gak lebih dari remaining
-            if (num > remaining) num = remaining;
+            part = randFloat(minVal, maxPart, decimals);
         } else {
-            num = rand(minVal, Math.min(maxVal, Math.floor(remaining)));
+            part = rand(Math.ceil(minVal), Math.floor(maxPart));
         }
-
-        // Kalau num = 0, set ke 1
-        if (num === 0) num = 1;
-
-        others.push(num);
-        remaining -= num;
-
-        // Kalau remaining < 0, break
-        if (remaining < 0) break;
+        // Pastikan part tidak melebihi remaining
+        if (part > remaining) part = remaining;
+        parts.push(part);
+        remaining -= part;
+    }
+    // Jika masih ada sisa (karena pembulatan), tambahkan ke bagian terakhir
+    if (remaining > 0) {
+        parts[parts.length - 1] += remaining;
     }
 
-    // Fallback: kalau jumlah angka kurang, tambahkan angka kecil
-    while (others.length < numOps - 1) {
-        if (decimals > 0) {
-            const small = randFloat(1, Math.min(remaining, 10), decimals);
-            others.push(small);
-            remaining -= small;
-        } else {
-            const small = rand(1, Math.min(remaining, 10));
-            others.push(small);
-            remaining -= small;
-        }
-    }
-
-    // Gabungkan
-    const nums = [first, ...others];
+    // 4. Susun angka
+    const nums = [first, ...parts];
     const answer = nums.reduce((a, b) => a - b, 0);
 
-    // Kalau answer negatif (jarang terjadi), paksa perbaiki
+    // 5. Jika answer negatif (sangat jarang), kita naikkan first
     if (answer < 0) {
-        // Tambah angka pertama
-        nums[0] = nums[0] + Math.abs(answer) + 10;
+        first += Math.abs(answer) + 10;
+        nums[0] = first;
         const newAnswer = nums.reduce((a, b) => a - b, 0);
         return { display: `${nums.join(" − ")} = ?`, answer: newAnswer };
     }
 
-    const display = nums.join(" − ");
+    // Tampilkan dalam format yang rapi (bisa desimal)
+    const display = nums.map(n => {
+        if (Number.isInteger(n)) return n.toString();
+        return n.toFixed(decimals || 0);
+    }).join(" − ");
+
     return { display: `${display} = ?`, answer };
 }
 
