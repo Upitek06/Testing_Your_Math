@@ -32,6 +32,10 @@ export default function Practice() {
         setFeedback,
         resetPracticeState,
         setScreen,
+        isSequential,        // <-- tambah
+        setIsSequential,    // <-- tambah
+        sequenceDelay,      // <-- tambah
+        setSequenceDelay,
     } = usePractice();
 
     const [inputValue, setInputValue] = useState<string>("");

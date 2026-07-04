@@ -20,6 +20,12 @@ interface PracticeContextType {
     rootValue: number;
     setRootValue: (r: number) => void;
 
+    // Sequential addition
+    isSequential: boolean;
+    setIsSequential: (val: boolean) => void;
+    sequenceDelay: number;
+    setSequenceDelay: (val: number) => void;
+
     questions: any[];
     setQuestions: React.Dispatch<React.SetStateAction<any[]>>;
     currentIndex: number;
@@ -50,6 +56,10 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
     const [timeLimit, setTimeLimit] = useState<number>(10);
     const [difficulty, setDifficulty] = useState<Difficulty>("mudah");
     const [rootValue, setRootValue] = useState<number>(2);
+
+    // Sequential addition
+    const [isSequential, setIsSequential] = useState<boolean>(false);
+    const [sequenceDelay, setSequenceDelay] = useState<number>(2);
 
     const [questions, setQuestions] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -88,6 +98,10 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
                 setDifficulty,
                 rootValue,
                 setRootValue,
+                isSequential,
+                setIsSequential,
+                sequenceDelay,
+                setSequenceDelay,
                 questions,
                 setQuestions,
                 currentIndex,

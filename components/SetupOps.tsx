@@ -14,6 +14,10 @@ export default function SetupOps() {
         difficulty,
         setDifficulty,
         resetPracticeState,
+        isSequential,
+        setIsSequential,
+        sequenceDelay,
+        setSequenceDelay
     } = usePractice();
 
     const [customTime, setCustomTime] = useState<number>(20);
@@ -148,7 +152,48 @@ export default function SetupOps() {
                     </div>
                 </div>
             </div>
-
+            {/* ===== MODE TAMPILAN ===== */}
+            <div className="form-group">
+                <label>Mode tampilan</label>
+                <div className="mode-options">
+                    <button
+                        className={`btn btn-sm ${!isSequential ? 'active' : ''}`}
+                        onClick={() => setIsSequential(false)}
+                    >
+                        Langsung
+                    </button>
+                    <button
+                        className={`btn btn-sm ${isSequential ? 'active' : ''}`}
+                        onClick={() => setIsSequential(true)}
+                    >
+                        Bertahap
+                    </button>
+                </div>
+                {isSequential && (
+                    <div className="mt-8" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <label style={{ fontSize: 14, color: '#94a3b8' }}>Jeda per angka:</label>
+                        <input
+                            type="number"
+                            value={sequenceDelay}
+                            onChange={(e) => setSequenceDelay(Math.max(1, parseInt(e.target.value) || 1))}
+                            min={1}
+                            max={10}
+                            style={{
+                                width: 80,
+                                padding: '8px 12px',
+                                background: 'rgba(0,0,0,0.35)',
+                                border: '1.5px solid rgba(255,255,255,0.08)',
+                                borderRadius: 12,
+                                color: '#e8edf5',
+                                fontSize: 16,
+                                fontWeight: 500,
+                                outline: 'none',
+                            }}
+                        />
+                        <span style={{ color: '#94a3b8', fontSize: 14 }}>detik</span>
+                    </div>
+                )}
+            </div>
             {/* ===== WAKTU ===== */}
             <div className="form-group">
                 <label>Waktu latihan</label>
