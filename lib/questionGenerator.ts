@@ -37,18 +37,37 @@ function generateSubtraction(numOps: number, diff: string) {
         case "ekstrem": rangeMin = 100; rangeMax = 9999; decimals = 2; break;
         default: rangeMin = 10; rangeMax = 99;
     }
+
     let attempts = 0;
-    while (attempts < 100) {
+    while (attempts < 200) {
         nums = [];
         for (let i = 0; i < numOps; i++) {
             if (decimals > 0) nums.push(randFloat(rangeMin, rangeMax, decimals));
             else nums.push(rand(rangeMin, rangeMax));
         }
+        // Pastikan nums[0] >= jumlah semua angka lainnya
         const rest = nums.slice(1).reduce((a, b) => a + b, 0);
-        if (nums[0] >= rest) break;
+        if (nums[0] >= rest && nums[0] - rest >= 0) {
+            break;
+        }
         attempts++;
     }
+
+    // Fallback jika gagal
+    if (nums.length < 2 || nums[0] < nums.slice(1).reduce((a, b) => a + b, 0)) {
+        nums = [50, 20, 10]; // contoh aman
+        if (numOps > 3) nums.push(5);
+    }
+
     const answer = nums.reduce((a, b) => a - b, 0);
+    // Pastikan answer tidak negatif (tambahan)
+    if (answer < 0) {
+        // swap atau adjust
+        const total = nums.reduce((a, b) => a + b, 0);
+        nums[0] = total;
+        return generateSubtraction(numOps, diff); // rekur
+    }
+
     return { display: `${nums.join(" − ")} = ?`, answer };
 }
 

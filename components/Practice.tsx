@@ -232,12 +232,14 @@ export default function Practice() {
                 <input
                     ref={inputRef}
                     type="text"
+                    inputMode="decimal"
+                    pattern="[0-9.-]*"
+                    autoComplete="off"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAnswer()}
                     placeholder="Jawaban..."
                     disabled={!isRunning || isAnswered}
-                    autoComplete="off"
                 />
                 <button className="btn btn-primary" onClick={handleAnswer} disabled={!isRunning || isAnswered}>
                     Kirim
