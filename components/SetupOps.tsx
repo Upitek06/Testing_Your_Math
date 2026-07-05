@@ -185,53 +185,56 @@ export default function SetupOps() {
             )}
 
             {/* WAKTU */}
-            <div className="form-group">
-                <label>Waktu latihan</label>
-                <div className="time-options">
-                    {[5, 10, 15].map((sec) => (
+            {/* ===== WAKTU (hanya muncul kalau mode Langsung) ===== */}
+            {!isSequential && (
+                <div className="form-group">
+                    <label>Waktu latihan</label>
+                    <div className="time-options">
+                        {[5, 10, 15].map((sec) => (
+                            <button
+                                key={sec}
+                                className={`btn btn-sm ${!showCustom && timeLimit === sec ? "active" : ""}`}
+                                onClick={() => handleTimeSelect(sec)}
+                            >
+                                {sec}s
+                            </button>
+                        ))}
                         <button
-                            key={sec}
-                            className={`btn btn-sm ${!showCustom && timeLimit === sec ? "active" : ""}`}
-                            onClick={() => handleTimeSelect(sec)}
+                            className={`btn btn-sm ${showCustom ? "active" : ""}`}
+                            onClick={() => handleTimeSelect("custom")}
                         >
-                            {sec}s
+                            Custom
                         </button>
-                    ))}
-                    <button
-                        className={`btn btn-sm ${showCustom ? "active" : ""}`}
-                        onClick={() => handleTimeSelect("custom")}
-                    >
-                        Custom
-                    </button>
-                </div>
-                {showCustom && (
-                    <div className="mt-8" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <input
-                            ref={inputRef}
-                            type="number"
-                            value={customTime}
-                            onChange={handleCustomChange}
-                            min={1}
-                            max={999}
-                            style={{
-                                width: 120,
-                                padding: "12px 16px",
-                                background: "rgba(0,0,0,0.35)",
-                                border: "1.5px solid rgba(255,255,255,0.08)",
-                                borderRadius: 16,
-                                color: "#e8edf5",
-                                fontSize: 16,
-                                fontWeight: 500,
-                                outline: "none",
-                            }}
-                        />
-                        <span style={{ color: "#94a3b8", fontSize: 15 }}>detik</span>
-                        <span style={{ color: "#64748b", fontSize: 12, marginLeft: 4 }}>
-                            (max 999)
-                        </span>
                     </div>
-                )}
-            </div>
+                    {showCustom && (
+                        <div className="mt-8" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <input
+                                ref={inputRef}
+                                type="number"
+                                value={customTime}
+                                onChange={handleCustomChange}
+                                min={1}
+                                max={999}
+                                style={{
+                                    width: 120,
+                                    padding: "12px 16px",
+                                    background: "rgba(0,0,0,0.35)",
+                                    border: "1.5px solid rgba(255,255,255,0.08)",
+                                    borderRadius: 16,
+                                    color: "#e8edf5",
+                                    fontSize: 16,
+                                    fontWeight: 500,
+                                    outline: "none",
+                                }}
+                            />
+                            <span style={{ color: "#94a3b8", fontSize: 15 }}>detik</span>
+                            <span style={{ color: "#64748b", fontSize: 12, marginLeft: 4 }}>
+                                (max 999)
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* LEVEL */}
             <div className="form-group">

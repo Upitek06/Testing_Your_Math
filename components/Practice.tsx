@@ -321,7 +321,7 @@ export default function Practice() {
                             <span>📝 <span className="stat-value">{totalCount}</span></span>
                         </div>
                     </div>
-                    {/* 🔥 Timer TIDAK ditampilkan di mode sequential */}
+                    {/* 🔥 Timer TIDAK ADA di sini */}
                 </div>
 
                 <div className="question-box" style={{ minHeight: 160 }}>
