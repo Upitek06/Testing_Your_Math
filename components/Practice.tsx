@@ -69,7 +69,7 @@ export default function Practice() {
                 setWrongCount(0);
                 setTotalCount(0);
 
-                if (isSequential && operation === 1) {
+                if (isSequential && (operation === 1 || operation === 2)) {
                     const numbers = (qs[0] as any)?.nums || [];
                     setNumbersList(numbers);
                     setCurrentSeqIndex(0);
