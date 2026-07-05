@@ -71,6 +71,10 @@ export default function Practice() {
 
                 if (isSequential && (operation === 1 || operation === 2)) {
                     const numbers = (qs[0] as any)?.nums || [];
+                    console.log("📋 numbersList dari qs[0]:", numbers); // <-- LOG INI
+                    if (numbers.length === 0) {
+                        console.error("❌ numbersList KOSONG! qs[0]:", qs[0]);
+                    }
                     setNumbersList(numbers);
                     setCurrentSeqIndex(0);
                     setShowTotalInput(false);
@@ -97,13 +101,30 @@ export default function Practice() {
 
     // === TIMER SEQUENTIAL ===
     useEffect(() => {
-        if (!isRunning || !isSequential || operation !== 1) return;
-        if (showTotalInput) return;
+        console.log("🔥 TIMER SEQUENTIAL RUNNING", {
+            isRunning,
+            isSequential,
+            operation,
+            currentSeqIndex,
+            numbersListLength: numbersList.length,
+            showTotalInput
+        });
 
-        const delay = 2000; // 2 detik per angka
+        if (!isRunning || !isSequential || (operation !== 1 && operation !== 2)) {
+            console.log("⛔ Timer skipped karena kondisi false");
+            return;
+        }
+        if (showTotalInput) {
+            console.log("⛔ Timer skipped karena showTotalInput true");
+            return;
+        }
+
+        const delay = 2000;
+        console.log(`⏳ Set timeout ${delay}ms untuk index ${currentSeqIndex}`);
 
         const timer = setTimeout(() => {
             const nextIndex = currentSeqIndex + 1;
+            console.log(`➡️ Next index: ${nextIndex}, total: ${numbersList.length}`);
             if (nextIndex < numbersList.length) {
                 setCurrentSeqIndex(nextIndex);
             } else {

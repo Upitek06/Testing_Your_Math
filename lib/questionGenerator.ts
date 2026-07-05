@@ -31,12 +31,12 @@ function generateAddition(numOps: number, diff: string) {
 }
 
 function generateSubtraction(numOps: number, diff: string) {
-    let rangeMin: number, rangeMax: number, decimals: number = 0;
+    let rangeMin: number, rangeMax: number;
     switch (diff) {
         case "mudah": rangeMin = 10; rangeMax = 99; break;
         case "sedang": rangeMin = 10; rangeMax = 999; break;
         case "sulit": rangeMin = 100; rangeMax = 999; break;
-        case "ekstrem": rangeMin = 100; rangeMax = 9999; decimals = 2; break;
+        case "ekstrem": rangeMin = 100; rangeMax = 9999; break;
         default: rangeMin = 10; rangeMax = 99;
     }
 
@@ -64,11 +64,12 @@ function generateSubtraction(numOps: number, diff: string) {
     const nums = [first, ...parts];
     const answer = nums.reduce((a, b) => a - b);
 
-    // PASTIKAN RETURN INI
+    console.log("🔢 generateSubtraction result:", { nums, answer }); // <-- LOG INI
+
     return {
         display: `${nums.join(" − ")} = ?`,
         answer: answer,
-        nums: nums, // <-- HARUS ADA
+        nums: nums, // <-- PASTIKAN INI ADA
     };
 }
 
