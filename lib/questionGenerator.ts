@@ -40,81 +40,35 @@ function generateSubtraction(numOps: number, diff: string) {
         default: rangeMin = 10; rangeMax = 99;
     }
 
-    // 1. Generate angka pertama (yang akan dikurangi)
-    let first: number;
-    if (decimals > 0) {
-        first = randFloat(rangeMin, rangeMax, decimals);
-    } else {
-        first = rand(rangeMin, rangeMax);
-    }
+    const first = rand(rangeMin, rangeMax);
+    const maxSubtract = Math.max(first - 1, 1);
+    const totalSubtract = rand(1, maxSubtract);
 
-    // 2. Tentukan total pengurang (harus lebih kecil dari first)
-    let maxSubtract = first;
-    // Pastikan minimal 1 (atau 0.1 jika desimal)
-    const minVal = decimals > 0 ? 0.1 : 1;
-    // Total pengurang di antara minVal * (numOps-1) dan maxSubtract * 0.9 (agar tidak terlalu besar)
-    let maxTotal = Math.min(maxSubtract * 0.9, first - (numOps - 1) * minVal);
-    if (maxTotal < (numOps - 1) * minVal) {
-        // Jika terlalu kecil, kita paksa angka pertama lebih besar
-        if (decimals > 0) {
-            first = randFloat(rangeMin * 2, rangeMax * 2, decimals);
-        } else {
-            first = rand(rangeMin * 2, rangeMax * 2);
-        }
-        maxTotal = first * 0.9;
-    }
-
-    let totalSubtract: number;
-    if (decimals > 0) {
-        totalSubtract = randFloat((numOps - 1) * minVal, maxTotal, decimals);
-    } else {
-        totalSubtract = rand(Math.ceil((numOps - 1) * minVal), Math.floor(maxTotal));
-    }
-
-    // 3. Bagi totalSubtract menjadi (numOps - 1) bagian
     let parts: number[] = [];
     let remaining = totalSubtract;
     for (let i = 0; i < numOps - 1; i++) {
-        let maxPart = remaining - (numOps - 2 - i) * minVal;
-        if (maxPart < minVal) maxPart = minVal;
-        let part: number;
-        if (decimals > 0) {
-            part = randFloat(minVal, maxPart, decimals);
+        if (i === numOps - 2) {
+            parts.push(remaining);
         } else {
-            part = rand(Math.ceil(minVal), Math.floor(maxPart));
+            const maxPart = Math.max(remaining - (numOps - 2 - i), 1);
+            const part = rand(1, maxPart);
+            parts.push(part);
+            remaining -= part;
         }
-        // Pastikan part tidak melebihi remaining
-        if (part > remaining) part = remaining;
-        parts.push(part);
-        remaining -= part;
-    }
-    // Jika masih ada sisa (karena pembulatan), tambahkan ke bagian terakhir
-    if (remaining > 0) {
-        parts[parts.length - 1] += remaining;
     }
 
-    // 4. Susun angka
+    if (parts.reduce((a, b) => a + b, 0) !== totalSubtract) {
+        parts[parts.length - 1] += totalSubtract - parts.reduce((a, b) => a + b, 0);
+    }
+
     const nums = [first, ...parts];
     const answer = nums.reduce((a, b) => a - b);
 
-    // 5. Jika answer negatif (sangat jarang), kita naikkan first
-    if (answer < 0) {
-        first += Math.abs(answer) + 10;
-        nums[0] = first;
-        const newAnswer = nums.reduce((a, b) => a - b);
-        return { display: `${nums.join(" − ")} = ?`, answer: newAnswer };
-    }
-
-    // Tampilkan dalam format yang rapi (bisa desimal)
-    const display = nums.map(n => {
-        if (Number.isInteger(n)) return n.toString();
-        return n.toFixed(decimals || 0);
-    }).join(" − ");
-
+    // PASTIKAN RETURN INI
     return {
         display: `${nums.join(" − ")} = ?`,
-        answer: nums.reduce((a, b) => a - b),
-        nums: nums, // <-- HARUS ADA INI
+        answer: answer,
+        nums: nums, // <-- HARUS ADA
     };
 }
 
