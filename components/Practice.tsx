@@ -171,7 +171,12 @@ export default function Practice() {
                 setFeedback({ message: `✅ Benar! Jawaban: ${currentQuestion.answer}`, type: "correct" });
             } else {
                 setWrongCount((prev) => prev + 1);
-                setFeedback({ message: `❌ Salah! Jawaban yang benar: ${currentQuestion.answer}`, type: "wrong" });
+                // Tampilkan deret angka + jawaban benar saat salah
+                const numberString = numbersList.join(" + ");
+                setFeedback({
+                    message: `❌ Salah! ${numberString} = ${currentQuestion.answer}`,
+                    type: "wrong"
+                });
             }
             setIsAnswered(true);
             setTimeout(() => {
