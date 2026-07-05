@@ -111,7 +111,11 @@ function generateSubtraction(numOps: number, diff: string) {
         return n.toFixed(decimals || 0);
     }).join(" − ");
 
-    return { display: `${display} = ?`, answer };
+    return {
+        display: `${nums.join(" − ")} = ?`,
+        answer: nums.reduce((a, b) => a - b),
+        nums: nums, // <-- HARUS ADA INI
+    };
 }
 
 function generateMultiplication(numOps: number, diff: string) {
