@@ -318,9 +318,12 @@ export default function Practice() {
                         </>
                     ) : (
                         <>
-                            <div className="question-number">📝 Jumlahkan semua angka!</div>
-                            <div className="question-text" style={{ fontSize: 20, color: "#94a3b8" }}>
-                                {numbersList.join(" + ")} = ?
+                            <div className="question-number">🧠 Jumlahkan semua angka yang tadi muncul!</div>
+                            <div className="question-text" style={{ fontSize: 24, color: "#fbbf24", fontWeight: 700 }}>
+                                ?
+                            </div>
+                            <div style={{ fontSize: 14, color: "#64748b", marginTop: 8 }}>
+                                Masukkan total dari semua angka yang sudah ditampilkan
                             </div>
                         </>
                     )}
