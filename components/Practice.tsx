@@ -57,8 +57,7 @@ export default function Practice() {
                 const validTime = typeof timeLimit === "number" && timeLimit > 0 ? timeLimit : 10;
 
                 let qs;
-                if (isSequential && operation === 1) {
-                    // Sequential: generate 1 soal dengan jumlah angka sesuai sequenceCount
+                if (isSequential && (operation === 1 || operation === 2)) {
                     qs = generateQuestions(operation, sequenceCount, difficulty, rootValue, 1);
                 } else {
                     qs = generateQuestions(operation, numOperands, difficulty, rootValue, 60);
@@ -120,7 +119,7 @@ export default function Practice() {
 
     // === TIMER BIASA ===
     useEffect(() => {
-        if (!isRunning || isSequential) return;
+        if (!isRunning || !isSequential || (operation !== 1 && operation !== 2)) return;
         if (timeLeft > 0) {
             timerRef.current = setTimeout(() => {
                 setTimeLeft((prev) => {
@@ -153,7 +152,7 @@ export default function Practice() {
         if (!isRunning || isAnswered || !currentQuestion) return;
 
         // Sequential: user input total
-        if (isSequential && operation === 1) {
+        if (isSequential && (operation === 1 || operation === 2)) {
             const val = inputValue.trim();
             if (val === "") {
                 setFeedback({ message: "⚠️ Masukkan jawaban!", type: "wrong" });
@@ -230,7 +229,7 @@ export default function Practice() {
         if (seqTimer) clearTimeout(seqTimer);
 
         // Simpan data sequential jika ada
-        if (isSequential && operation === 1 && numbersList.length > 0 && currentQuestion) {
+        if (isSequential && (operation === 1 || operation === 2) && numbersList.length > 0 && currentQuestion) {
             setSequenceData({
                 numbers: numbersList,
                 answer: currentQuestion.answer,
@@ -286,7 +285,7 @@ export default function Practice() {
     }
 
     // === RENDER SEQUENTIAL ===
-    if (isSequential && operation === 1) {
+    if (isSequential && (operation === 1 || operation === 2)) {
         const currentNumber = numbersList[currentSeqIndex];
         const isFinished = showTotalInput;
 

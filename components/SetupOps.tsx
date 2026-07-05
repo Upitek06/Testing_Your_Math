@@ -174,10 +174,8 @@ export default function SetupOps() {
                                 className="library-select"
                                 style={{ width: 80 }}
                             >
-                                {sequenceOptions.map((num) => (
-                                    <option key={num} value={num}>
-                                        {num}
-                                    </option>
+                                {[3, 5, 10, 15, 20, 25, 30].map((num) => (
+                                    <option key={num} value={num}>{num}</option>
                                 ))}
                             </select>
                             <span style={{ color: "#64748b", fontSize: 12 }}>(setiap angka 2 detik)</span>

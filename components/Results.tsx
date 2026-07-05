@@ -3,12 +3,25 @@
 import { usePractice } from "@/contexts/PracticeContext";
 
 export default function Results() {
-    const { correctCount, wrongCount, totalCount, resetPracticeState, setScreen } =
-        usePractice();
-
-    const { sequenceData } = usePractice();
+    const {
+        correctCount,
+        wrongCount,
+        totalCount,
+        resetPracticeState,
+        setScreen,
+        sequenceData,
+        operation,
+    } = usePractice();
 
     const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+
+    // Tentukan operator berdasarkan operasi
+    const operator = operation === 1 ? " + " : " − ";
+
+    // Buat string deret angka (kalau ada data sequential)
+    const numberString = sequenceData && sequenceData.numbers
+        ? sequenceData.numbers.join(operator)
+        : "";
 
     const handleRetry = () => {
         resetPracticeState();
@@ -27,10 +40,11 @@ export default function Results() {
                 <p style={{ color: "#94a3b8" }}>Bagaimana hasil latihanmu?</p>
             </div>
 
-            {sequenceData && (
+            {/* TAMPILAN SEQUENTIAL (deret angka + jawaban) */}
+            {sequenceData && sequenceData.numbers && sequenceData.numbers.length > 0 && (
                 <div className="sequence-result-box">
                     <div className="sequence-numbers">
-                        {sequenceData.numbers.join(' + ')} = ?
+                        {numberString} = ?
                     </div>
                     <div className="sequence-answer">
                         Jawaban benar: <strong>{sequenceData.answer}</strong>
