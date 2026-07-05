@@ -333,9 +333,12 @@ export default function Practice() {
                             <span>📝 <span className="stat-value">{totalCount}</span></span>
                         </div>
                     </div>
-                    <div className={`timer-display ${timeLeft <= 3 ? "warning" : ""}`}>
-                        {timeLeft}
-                    </div>
+                    {/* Timer cuma muncul di mode Langsung */}
+                    {!(isSequential && (operation === 1 || operation === 2)) && (
+                        <div className={`timer-display ${timeLeft <= 3 ? "warning" : ""}`}>
+                            {timeLeft}
+                        </div>
+                    )}
                 </div>
 
                 <div className="question-box" style={{ minHeight: 160 }}>
