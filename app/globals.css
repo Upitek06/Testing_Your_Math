@@ -772,6 +772,7 @@ select option {
   -webkit-tap-highlight-color: transparent;
 }
 
+
 .dropdown-trigger:hover {
   border-color: rgba(255, 255, 255, 0.15);
 }
@@ -2112,6 +2113,35 @@ select option {
 .library-card-power .power-result {
   color: #34d399;
   font-weight: 700;
+}
+
+/* ===== MODE TAMPILAN (Langsung / Bertahap) ===== */
+.mode-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mode-options .btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-options .btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mode-options .btn.active {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+  color: #fbbf24;
 }
 
 /* Responsive */

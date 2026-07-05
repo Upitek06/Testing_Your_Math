@@ -23,8 +23,8 @@ interface PracticeContextType {
     // Sequential addition
     isSequential: boolean;
     setIsSequential: (val: boolean) => void;
-    sequenceDelay: number;
-    setSequenceDelay: (val: number) => void;
+    sequenceCount: number; // jumlah angka yang mau ditampilkan
+    setSequenceCount: (val: number) => void;
 
     questions: any[];
     setQuestions: React.Dispatch<React.SetStateAction<any[]>>;
@@ -59,7 +59,7 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
 
     // Sequential addition
     const [isSequential, setIsSequential] = useState<boolean>(false);
-    const [sequenceDelay, setSequenceDelay] = useState<number>(2);
+    const [sequenceCount, setSequenceCount] = useState<number>(5); // default 5 angka
 
     const [questions, setQuestions] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -100,8 +100,8 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
                 setRootValue,
                 isSequential,
                 setIsSequential,
-                sequenceDelay,
-                setSequenceDelay,
+                sequenceCount,
+                setSequenceCount,
                 questions,
                 setQuestions,
                 currentIndex,

@@ -12,6 +12,8 @@ export default function Practice() {
         difficulty,
         rootValue,
         timeLimit,
+        isSequential,
+        sequenceCount,
         questions,
         setQuestions,
         currentIndex,
@@ -32,15 +34,18 @@ export default function Practice() {
         setFeedback,
         resetPracticeState,
         setScreen,
-        isSequential,        // <-- tambah
-        setIsSequential,    // <-- tambah
-        sequenceDelay,      // <-- tambah
-        setSequenceDelay,
     } = usePractice();
 
     const [inputValue, setInputValue] = useState<string>("");
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+
+    // State untuk sequential
+    const [numbersList, setNumbersList] = useState<number[]>([]);
+    const [currentSeqIndex, setCurrentSeqIndex] = useState<number>(0);
+    const [showTotalInput, setShowTotalInput] = useState<boolean>(false);
+    const [seqTimer, setSeqTimer] = useState<NodeJS.Timeout | null>(null);
+
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,29 +55,72 @@ export default function Practice() {
             try {
                 const validTime = typeof timeLimit === "number" && timeLimit > 0 ? timeLimit : 10;
 
-                const qs = generateQuestions(operation, numOperands, difficulty, rootValue, 60);
+                let qs;
+                if (isSequential && operation === 1) {
+                    // Sequential: generate 1 soal dengan jumlah angka sesuai sequenceCount
+                    qs = generateQuestions(operation, sequenceCount, difficulty, rootValue, 1);
+                } else {
+                    qs = generateQuestions(operation, numOperands, difficulty, rootValue, 60);
+                }
+
                 setQuestions(qs);
                 setCurrentIndex(0);
                 setCorrectCount(0);
                 setWrongCount(0);
                 setTotalCount(0);
-                setTimeLeft(validTime);
-                setIsRunning(true);
-                setIsAnswered(false);
-                setFeedback({ message: "", type: "" });
-                setInputValue("");
-                setIsInitialized(true);
+
+                if (isSequential && operation === 1) {
+                    const numbers = (qs[0] as any)?.nums || [];
+                    setNumbersList(numbers);
+                    setCurrentSeqIndex(0);
+                    setShowTotalInput(false);
+                    setTimeLeft(validTime);
+                    setIsRunning(true);
+                    setIsAnswered(false);
+                    setFeedback({ message: "", type: "" });
+                    setInputValue("");
+                    setIsInitialized(true);
+                } else {
+                    setTimeLeft(validTime);
+                    setIsRunning(true);
+                    setIsAnswered(false);
+                    setFeedback({ message: "", type: "" });
+                    setInputValue("");
+                    setIsInitialized(true);
+                }
             } catch (error) {
                 console.error("Gagal generate soal:", error);
                 setFeedback({ message: "Terjadi error saat memuat soal", type: "wrong" });
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isInitialized, operation]);
+    }, [isInitialized, operation, isSequential, sequenceCount, numOperands, difficulty, rootValue, timeLimit]);
 
-    // === TIMER ===
+    // === TIMER SEQUENTIAL ===
     useEffect(() => {
-        if (isRunning && timeLeft > 0) {
+        if (!isRunning || !isSequential || operation !== 1) return;
+        if (showTotalInput) return;
+
+        const delay = 2000; // 2 detik per angka
+
+        const timer = setTimeout(() => {
+            const nextIndex = currentSeqIndex + 1;
+            if (nextIndex < numbersList.length) {
+                setCurrentSeqIndex(nextIndex);
+            } else {
+                setShowTotalInput(true);
+                setFeedback({ message: "📝 Sekarang jumlahkan semua angka!", type: "" });
+                if (inputRef.current) inputRef.current.focus();
+            }
+        }, delay);
+
+        setSeqTimer(timer);
+        return () => clearTimeout(timer);
+    }, [isRunning, isSequential, operation, currentSeqIndex, numbersList.length, showTotalInput]);
+
+    // === TIMER BIASA ===
+    useEffect(() => {
+        if (!isRunning || isSequential) return;
+        if (timeLeft > 0) {
             timerRef.current = setTimeout(() => {
                 setTimeLeft((prev) => {
                     const newTime = prev - 1;
@@ -87,21 +135,52 @@ export default function Practice() {
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isRunning, timeLeft]);
+    }, [isRunning, isSequential, timeLeft]);
 
     // === AUTO FOCUS ===
     useEffect(() => {
         if (inputRef.current && !isAnswered && isRunning) {
+            if (isSequential && !showTotalInput) return;
             inputRef.current.focus();
         }
-    }, [currentIndex, isAnswered, isRunning]);
+    }, [currentIndex, isAnswered, isRunning, isSequential, showTotalInput]);
 
     const currentQuestion = questions[currentIndex];
 
-    // === JAWAB ===
+    // === HANDLE ANSWER ===
     const handleAnswer = () => {
         if (!isRunning || isAnswered || !currentQuestion) return;
+
+        // Sequential: user input total
+        if (isSequential && operation === 1) {
+            const val = inputValue.trim();
+            if (val === "") {
+                setFeedback({ message: "⚠️ Masukkan jawaban!", type: "wrong" });
+                return;
+            }
+            const userAnswer = parseFloat(val);
+            if (isNaN(userAnswer)) {
+                setFeedback({ message: "⚠️ Masukkan angka yang valid!", type: "wrong" });
+                return;
+            }
+
+            const correct = Math.abs(userAnswer - currentQuestion.answer) < 0.001;
+            setTotalCount((prev) => prev + 1);
+            if (correct) {
+                setCorrectCount((prev) => prev + 1);
+                setFeedback({ message: `✅ Benar! Jawaban: ${currentQuestion.answer}`, type: "correct" });
+            } else {
+                setWrongCount((prev) => prev + 1);
+                setFeedback({ message: `❌ Salah! Jawaban yang benar: ${currentQuestion.answer}`, type: "wrong" });
+            }
+            setIsAnswered(true);
+            setTimeout(() => {
+                endPractice();
+            }, 2000);
+            return;
+        }
+
+        // Mode biasa
         const val = inputValue.trim();
         if (val === "") {
             setFeedback({ message: "⚠️ Masukkan jawaban!", type: "wrong" });
@@ -115,7 +194,6 @@ export default function Practice() {
 
         const correct = Math.abs(userAnswer - currentQuestion.answer) < 0.001;
         setTotalCount((prev) => prev + 1);
-
         if (correct) {
             setCorrectCount((prev) => prev + 1);
             setFeedback({ message: "✅ Benar!", type: "correct" });
@@ -144,45 +222,42 @@ export default function Practice() {
         }, 600);
     };
 
-    // === AKHIRI LATIHAN ===
+    // === END PRACTICE ===
     const endPractice = () => {
         setIsRunning(false);
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-        }
+        if (timerRef.current) clearTimeout(timerRef.current);
+        if (seqTimer) clearTimeout(seqTimer);
         setScreen("results");
     };
 
-    // === KELUAR (dengan modal) ===
+    // === QUIT ===
     const handleQuit = () => {
         if (isRunning) {
-            // Buka modal konfirmasi
             setShowConfirmModal(true);
         } else {
-            // Kalau gak running, langsung keluar
             resetPracticeState();
             setIsInitialized(false);
+            setNumbersList([]);
+            setCurrentSeqIndex(0);
+            setShowTotalInput(false);
             setScreen("menu");
         }
     };
 
-    // === KONFIRMASI KELUAR ===
     const confirmQuit = () => {
         setShowConfirmModal(false);
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-        }
+        if (timerRef.current) clearTimeout(timerRef.current);
+        if (seqTimer) clearTimeout(seqTimer);
         resetPracticeState();
         setIsInitialized(false);
+        setNumbersList([]);
+        setCurrentSeqIndex(0);
+        setShowTotalInput(false);
         setScreen("menu");
     };
 
-    // === BATALKAN KELUAR ===
     const cancelQuit = () => {
         setShowConfirmModal(false);
-        // Fokus balik ke input
         if (inputRef.current) inputRef.current.focus();
     };
 
@@ -198,9 +273,87 @@ export default function Practice() {
         );
     }
 
+    // === RENDER SEQUENTIAL ===
+    if (isSequential && operation === 1) {
+        const currentNumber = numbersList[currentSeqIndex];
+        const isFinished = showTotalInput;
+
+        return (
+            <>
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    onConfirm={confirmQuit}
+                    onCancel={cancelQuit}
+                    title="Keluar Latihan?"
+                    message="Apakah Anda yakin ingin keluar dari latihan? Semua progres akan hilang."
+                    confirmText="Ya, Keluar"
+                    cancelText="Batalkan"
+                />
+
+                <div className="practice-header">
+                    <div>
+                        <button className="back-btn" onClick={handleQuit} style={{ marginBottom: 4 }}>
+                            <span className="back-icon">✕</span> Keluar
+                        </button>
+                        <div className="practice-stats">
+                            <span>✅ <span className="stat-value correct">{correctCount}</span></span>
+                            <span>❌ <span className="stat-value wrong">{wrongCount}</span></span>
+                            <span>📝 <span className="stat-value">{totalCount}</span></span>
+                        </div>
+                    </div>
+                    <div className={`timer-display ${timeLeft <= 3 ? "warning" : ""}`}>
+                        {timeLeft}
+                    </div>
+                </div>
+
+                <div className="question-box" style={{ minHeight: 160 }}>
+                    {!isFinished ? (
+                        <>
+                            <div className="question-number">
+                                Angka ke-{currentSeqIndex + 1} dari {numbersList.length}
+                            </div>
+                            <div className="question-text" style={{ fontSize: 48, fontWeight: 700, color: "#fbbf24" }}>
+                                {currentNumber}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="question-number">📝 Jumlahkan semua angka!</div>
+                            <div className="question-text" style={{ fontSize: 20, color: "#94a3b8" }}>
+                                {numbersList.join(" + ")} = ?
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {isFinished && (
+                    <div className="answer-area">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            inputMode="decimal"
+                            pattern="[0-9.-]*"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleAnswer()}
+                            placeholder="Jumlah total..."
+                            disabled={!isRunning || isAnswered}
+                            autoComplete="off"
+                        />
+                        <button className="btn btn-primary" onClick={handleAnswer} disabled={!isRunning || isAnswered}>
+                            Kirim
+                        </button>
+                    </div>
+                )}
+
+                <div className={`feedback ${feedback.type}`}>{feedback.message}</div>
+            </>
+        );
+    }
+
+    // === RENDER BIASA ===
     return (
         <>
-            {/* Modal Konfirmasi */}
             <ConfirmModal
                 isOpen={showConfirmModal}
                 onConfirm={confirmQuit}
@@ -238,12 +391,12 @@ export default function Practice() {
                     type="text"
                     inputMode="decimal"
                     pattern="[0-9.-]*"
-                    autoComplete="off"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAnswer()}
                     placeholder="Jawaban..."
                     disabled={!isRunning || isAnswered}
+                    autoComplete="off"
                 />
                 <button className="btn btn-primary" onClick={handleAnswer} disabled={!isRunning || isAnswered}>
                     Kirim

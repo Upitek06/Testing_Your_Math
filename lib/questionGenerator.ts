@@ -23,8 +23,11 @@ function generateAddition(numOps: number, diff: string) {
         if (decimals > 0) nums.push(randFloat(rangeMin, rangeMax, decimals));
         else nums.push(rand(rangeMin, rangeMax));
     }
-    const answer = nums.reduce((a, b) => a + b, 0);
-    return { display: `${nums.join(" + ")} = ?`, answer };
+    return {
+        display: `${nums.join(" + ")} = ?`,
+        answer: nums.reduce((a, b) => a + b, 0),
+        nums: nums, // <-- HARUS ADA INI
+    };
 }
 
 function generateSubtraction(numOps: number, diff: string) {

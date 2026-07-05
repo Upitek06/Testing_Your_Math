@@ -16,8 +16,8 @@ export default function SetupOps() {
         resetPracticeState,
         isSequential,
         setIsSequential,
-        sequenceDelay,
-        setSequenceDelay
+        sequenceCount,
+        setSequenceCount,
     } = usePractice();
 
     const [customTime, setCustomTime] = useState<number>(20);
@@ -28,17 +28,16 @@ export default function SetupOps() {
 
     const opNames = ["", "Penjumlahan", "Pengurangan", "Perkalian", "Pembagian"];
     const operandOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const sequenceOptions = [3, 5, 10, 15, 20, 25, 30];
 
-    // Warna operasi
     const opColors = {
-        1: "#34d399", // hijau
-        2: "#60a5fa", // biru
-        3: "#fbbf24", // kuning
-        4: "#f87171", // merah
+        1: "#34d399",
+        2: "#60a5fa",
+        3: "#fbbf24",
+        4: "#f87171",
     };
     const activeColor = opColors[operation as keyof typeof opColors] || "#fbbf24";
 
-    // Tutup dropdown kalau klik di luar
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -49,7 +48,6 @@ export default function SetupOps() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Fokus ke input custom saat aktif
     useEffect(() => {
         if (showCustom && inputRef.current) {
             inputRef.current.focus();
@@ -109,13 +107,11 @@ export default function SetupOps() {
                 <h1 style={{ fontSize: 22 }}>{opNames[operation || 0] || "Operasi"}</h1>
             </div>
 
-            {/* ===== DROPDOWN JUMLAH ANGKA ===== */}
+            {/* DROPDOWN JUMLAH ANGKA */}
             <div className="form-group" ref={dropdownRef}>
                 <label>
                     Jumlah angka operasi <span className="sub-label">(2 – 10)</span>
                 </label>
-
-                {/* Tombol pemicu dropdown */}
                 <button
                     className="dropdown-trigger"
                     onClick={() => setShowOperandOptions(!showOperandOptions)}
@@ -126,8 +122,6 @@ export default function SetupOps() {
                     <span>{numOperands} angka</span>
                     <span className={`dropdown-arrow ${showOperandOptions ? "open" : ""}`}>▾</span>
                 </button>
-
-                {/* Pilihan angka (animasi slide down) */}
                 <div className={`dropdown-menu ${showOperandOptions ? "open" : ""}`}>
                     <div className="operand-grid">
                         {operandOptions.map((num) => (
@@ -152,49 +146,47 @@ export default function SetupOps() {
                     </div>
                 </div>
             </div>
-            {/* ===== MODE TAMPILAN ===== */}
-            <div className="form-group">
-                <label>Mode tampilan</label>
-                <div className="mode-options">
-                    <button
-                        className={`btn btn-sm ${!isSequential ? 'active' : ''}`}
-                        onClick={() => setIsSequential(false)}
-                    >
-                        Langsung
-                    </button>
-                    <button
-                        className={`btn btn-sm ${isSequential ? 'active' : ''}`}
-                        onClick={() => setIsSequential(true)}
-                    >
-                        Bertahap
-                    </button>
-                </div>
-                {isSequential && (
-                    <div className="mt-8" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <label style={{ fontSize: 14, color: '#94a3b8' }}>Jeda per angka:</label>
-                        <input
-                            type="number"
-                            value={sequenceDelay}
-                            onChange={(e) => setSequenceDelay(Math.max(1, parseInt(e.target.value) || 1))}
-                            min={1}
-                            max={10}
-                            style={{
-                                width: 80,
-                                padding: '8px 12px',
-                                background: 'rgba(0,0,0,0.35)',
-                                border: '1.5px solid rgba(255,255,255,0.08)',
-                                borderRadius: 12,
-                                color: '#e8edf5',
-                                fontSize: 16,
-                                fontWeight: 500,
-                                outline: 'none',
-                            }}
-                        />
-                        <span style={{ color: '#94a3b8', fontSize: 14 }}>detik</span>
+
+            {/* ===== MODE TAMPILAN (SEQUENTIAL) ===== */}
+            {operation === 1 && (
+                <div className="form-group">
+                    <label>Mode tampilan</label>
+                    <div className="mode-options">
+                        <button
+                            className={`btn btn-sm ${!isSequential ? "active" : ""}`}
+                            onClick={() => setIsSequential(false)}
+                        >
+                            Langsung
+                        </button>
+                        <button
+                            className={`btn btn-sm ${isSequential ? "active" : ""}`}
+                            onClick={() => setIsSequential(true)}
+                        >
+                            Bertahap
+                        </button>
                     </div>
-                )}
-            </div>
-            {/* ===== WAKTU ===== */}
+                    {isSequential && (
+                        <div className="mt-8" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                            <label style={{ fontSize: 14, color: "#94a3b8" }}>Jumlah angka yang ditampilkan:</label>
+                            <select
+                                value={sequenceCount}
+                                onChange={(e) => setSequenceCount(parseInt(e.target.value))}
+                                className="library-select"
+                                style={{ width: 80 }}
+                            >
+                                {sequenceOptions.map((num) => (
+                                    <option key={num} value={num}>
+                                        {num}
+                                    </option>
+                                ))}
+                            </select>
+                            <span style={{ color: "#64748b", fontSize: 12 }}>(setiap angka 2 detik)</span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* WAKTU */}
             <div className="form-group">
                 <label>Waktu latihan</label>
                 <div className="time-options">
@@ -243,7 +235,7 @@ export default function SetupOps() {
                 )}
             </div>
 
-            {/* ===== LEVEL KESULITAN ===== */}
+            {/* LEVEL */}
             <div className="form-group">
                 <label>Level kesulitan</label>
                 <div className="difficulty-options">
