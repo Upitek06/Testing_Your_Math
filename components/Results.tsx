@@ -6,6 +6,8 @@ export default function Results() {
     const { correctCount, wrongCount, totalCount, resetPracticeState, setScreen } =
         usePractice();
 
+    const { sequenceData } = usePractice();
+
     const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
 
     const handleRetry = () => {
@@ -24,6 +26,17 @@ export default function Results() {
                 <h1 style={{ fontSize: 26 }}>🏁 Selesai!</h1>
                 <p style={{ color: "#94a3b8" }}>Bagaimana hasil latihanmu?</p>
             </div>
+
+            {sequenceData && (
+                <div className="sequence-result-box">
+                    <div className="sequence-numbers">
+                        {sequenceData.numbers.join(' + ')} = ?
+                    </div>
+                    <div className="sequence-answer">
+                        Jawaban benar: <strong>{sequenceData.answer}</strong>
+                    </div>
+                </div>
+            )}
 
             <div className="results-grid">
                 <div className="result-card">

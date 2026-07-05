@@ -2164,3 +2164,28 @@ select option {
     min-height: 24px;
   }
 }
+
+.sequence-result-box {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+
+.sequence-numbers {
+  font-size: 18px;
+  color: #fbbf24;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.sequence-answer {
+  font-size: 15px;
+  color: #94a3b8;
+}
+
+.sequence-answer strong {
+  color: #34d399;
+}

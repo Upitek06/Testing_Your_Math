@@ -43,6 +43,8 @@ interface PracticeContextType {
     isAnswered: boolean;
     setIsAnswered: React.Dispatch<React.SetStateAction<boolean>>;
     feedback: Feedback;
+    setSequenceData: (data: { numbers: number[]; answer: number } | null) => void;
+    sequenceData: { numbers: number[]; answer: number } | null;
     setFeedback: (f: Feedback) => void;
     resetPracticeState: () => void;
 }
@@ -70,6 +72,7 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
     const [timeLeft, setTimeLeft] = useState<number>(10);
     const [isAnswered, setIsAnswered] = useState<boolean>(false);
     const [feedback, setFeedback] = useState<Feedback>({ message: "", type: "" });
+    const [sequenceData, setSequenceData] = useState<{ numbers: number[]; answer: number } | null>(null);
 
     const resetPracticeState = () => {
         setQuestions([]);
@@ -119,6 +122,8 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
                 isAnswered,
                 setIsAnswered,
                 feedback,
+                setSequenceData,
+                sequenceData,
                 setFeedback,
                 resetPracticeState,
             }}

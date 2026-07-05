@@ -34,6 +34,7 @@ export default function Practice() {
         setFeedback,
         resetPracticeState,
         setScreen,
+        setSequenceData,
     } = usePractice();
 
     const [inputValue, setInputValue] = useState<string>("");
@@ -168,20 +169,15 @@ export default function Practice() {
             setTotalCount((prev) => prev + 1);
             if (correct) {
                 setCorrectCount((prev) => prev + 1);
-                setFeedback({ message: `✅ Benar! Jawaban: ${currentQuestion.answer}`, type: "correct" });
+                setFeedback({ message: `✅ Benar!`, type: "correct" });
             } else {
                 setWrongCount((prev) => prev + 1);
-                // Tampilkan deret angka + jawaban benar saat salah
-                const numberString = numbersList.join(" + ");
-                setFeedback({
-                    message: `❌ Salah! ${numberString} = ${currentQuestion.answer}`,
-                    type: "wrong"
-                });
+                setFeedback({ message: `❌ Salah!`, type: "wrong" });
             }
             setIsAnswered(true);
             setTimeout(() => {
-                endPractice();
-            }, 2000);
+                endPractice(); // otomatis simpan data dan pindah ke results
+            }, 1500);
             return;
         }
 
@@ -232,6 +228,17 @@ export default function Practice() {
         setIsRunning(false);
         if (timerRef.current) clearTimeout(timerRef.current);
         if (seqTimer) clearTimeout(seqTimer);
+
+        // Simpan data sequential jika ada
+        if (isSequential && operation === 1 && numbersList.length > 0 && currentQuestion) {
+            setSequenceData({
+                numbers: numbersList,
+                answer: currentQuestion.answer,
+            });
+        } else {
+            setSequenceData(null);
+        }
+
         setScreen("results");
     };
 
