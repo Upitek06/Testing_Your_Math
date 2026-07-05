@@ -1,7 +1,7 @@
 "use client";
 
 import { usePractice } from "@/contexts/PracticeContext";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { generateQuestions } from "@/lib/questionGenerator";
 import ConfirmModal from "@/components/ConfirmModal";
 
@@ -123,26 +123,43 @@ export default function Practice() {
         return () => clearTimeout(timer);
     }, [isRunning, isSequential, operation, currentSeqIndex, numbersList.length, showTotalInput]);
 
-    // === TIMER BIASA ===
-    // === TIMER BIASA (hanya untuk mode langsung) ===
+    // === TIMER UNTUK MODE LANGSUNG ===
     useEffect(() => {
-        // 🔥 SKIP kalau sequential
-        if (!isRunning || isSequential) return;
-
-        if (timeLeft > 0) {
-            timerRef.current = setTimeout(() => {
-                setTimeLeft((prev) => {
-                    const newTime = prev - 1;
-                    if (newTime <= 0) {
-                        endPractice();
-                        return 0;
-                    }
-                    return newTime;
-                });
-            }, 1000);
+        // Cuma jalan kalau mode langsung (bukan sequential)
+        if (isSequential) {
+            console.log("⏸️ Timer skip karena mode sequential");
+            return;
         }
+        if (!isRunning) {
+            console.log("⏸️ Timer skip karena isRunning false");
+            return;
+        }
+        if (timeLeft <= 0) {
+            console.log("⏸️ Timer skip karena timeLeft <= 0");
+            return;
+        }
+
+        console.log(`⏱️ Timer jalan: ${timeLeft} detik tersisa`);
+
+        // Set timer untuk 1 detik
+        const timerId = setTimeout(() => {
+            setTimeLeft((prev) => {
+                const newTime = prev - 1;
+                console.log(`⏱️ Timer update: ${prev} → ${newTime}`);
+                if (newTime <= 0) {
+                    console.log("⏱️ Waktu habis! endPractice dipanggil");
+                    // Panggil endPractice di sini
+                    endPractice();
+                    return 0;
+                }
+                return newTime;
+            });
+        }, 1000);
+
+        // Cleanup: hapus timer kalau komponen unmount atau dependency berubah
         return () => {
-            if (timerRef.current) clearTimeout(timerRef.current);
+            console.log("🧹 Cleanup timer");
+            clearTimeout(timerId);
         };
     }, [isRunning, isSequential, timeLeft]);
 
@@ -232,8 +249,14 @@ export default function Practice() {
     };
 
     // === END PRACTICE ===
-    const endPractice = () => {
-        console.log("🏁 endPractice dipanggil!", { isSequential, operation });
+    const endPractice = useCallback(() => {
+        // Cegah double call
+        if (!isRunning) {
+            console.log("⚠️ endPractice sudah dipanggil, skip");
+            return;
+        }
+
+        console.log("🏁 endPractice dipanggil!");
         setIsRunning(false);
         if (timerRef.current) clearTimeout(timerRef.current);
         if (seqTimer) clearTimeout(seqTimer);
@@ -248,7 +271,7 @@ export default function Practice() {
         }
 
         setScreen("results");
-    };
+    }, [isRunning, isSequential, operation, numbersList, currentQuestion, setSequenceData, setScreen]);
 
     // === QUIT ===
     const handleQuit = () => {
