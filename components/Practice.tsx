@@ -101,33 +101,18 @@ export default function Practice() {
 
     // === TIMER SEQUENTIAL ===
     useEffect(() => {
-        console.log("🔥 TIMER SEQUENTIAL RUNNING", {
-            isRunning,
-            isSequential,
-            operation,
-            currentSeqIndex,
-            numbersListLength: numbersList.length,
-            showTotalInput
-        });
+        console.log("🔥 TIMER SEQUENTIAL", { isRunning, isSequential, operation, currentSeqIndex, numbersListLength: numbersList.length, showTotalInput });
 
-        if (!isRunning || !isSequential || (operation !== 1 && operation !== 2)) {
-            console.log("⛔ Timer skipped karena kondisi false");
-            return;
-        }
-        if (showTotalInput) {
-            console.log("⛔ Timer skipped karena showTotalInput true");
-            return;
-        }
+        if (!isRunning || !isSequential || (operation !== 1 && operation !== 2)) return;
+        if (showTotalInput) return;
 
         const delay = 2000;
-        console.log(`⏳ Set timeout ${delay}ms untuk index ${currentSeqIndex}`);
-
         const timer = setTimeout(() => {
             const nextIndex = currentSeqIndex + 1;
-            console.log(`➡️ Next index: ${nextIndex}, total: ${numbersList.length}`);
             if (nextIndex < numbersList.length) {
                 setCurrentSeqIndex(nextIndex);
             } else {
+                console.log("📝 Selesai tampil angka, user harus input!");
                 setShowTotalInput(true);
                 setFeedback({ message: "📝 Sekarang jumlahkan semua angka!", type: "" });
                 if (inputRef.current) inputRef.current.focus();
@@ -139,8 +124,11 @@ export default function Practice() {
     }, [isRunning, isSequential, operation, currentSeqIndex, numbersList.length, showTotalInput]);
 
     // === TIMER BIASA ===
+    // === TIMER BIASA (hanya untuk mode langsung) ===
     useEffect(() => {
-        if (!isRunning || !isSequential || (operation !== 1 && operation !== 2)) return;
+        // 🔥 SKIP kalau sequential
+        if (!isRunning || isSequential) return;
+
         if (timeLeft > 0) {
             timerRef.current = setTimeout(() => {
                 setTimeLeft((prev) => {
@@ -245,11 +233,11 @@ export default function Practice() {
 
     // === END PRACTICE ===
     const endPractice = () => {
+        console.log("🏁 endPractice dipanggil!", { isSequential, operation });
         setIsRunning(false);
         if (timerRef.current) clearTimeout(timerRef.current);
         if (seqTimer) clearTimeout(seqTimer);
 
-        // Simpan data sequential jika ada
         if (isSequential && (operation === 1 || operation === 2) && numbersList.length > 0 && currentQuestion) {
             setSequenceData({
                 numbers: numbersList,
@@ -333,12 +321,7 @@ export default function Practice() {
                             <span>📝 <span className="stat-value">{totalCount}</span></span>
                         </div>
                     </div>
-                    {/* Timer cuma muncul di mode Langsung */}
-                    {!(isSequential && (operation === 1 || operation === 2)) && (
-                        <div className={`timer-display ${timeLeft <= 3 ? "warning" : ""}`}>
-                            {timeLeft}
-                        </div>
-                    )}
+                    {/* 🔥 Timer TIDAK ditampilkan di mode sequential */}
                 </div>
 
                 <div className="question-box" style={{ minHeight: 160 }}>
@@ -413,6 +396,7 @@ export default function Practice() {
                         <span>📝 <span className="stat-value">{totalCount}</span></span>
                     </div>
                 </div>
+                {/* 🔥 Timer muncul di mode langsung */}
                 <div className={`timer-display ${timeLeft <= 3 ? "warning" : ""}`}>
                     {timeLeft}
                 </div>
