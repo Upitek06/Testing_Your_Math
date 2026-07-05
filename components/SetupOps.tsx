@@ -148,7 +148,7 @@ export default function SetupOps() {
             </div>
 
             {/* ===== MODE TAMPILAN (SEQUENTIAL) ===== */}
-            {operation === 1 && (
+            {(operation === 1 || operation === 2) && (
                 <div className="form-group">
                     <label>Mode tampilan</label>
                     <div className="mode-options">
