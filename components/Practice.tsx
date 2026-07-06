@@ -35,6 +35,7 @@ export default function Practice() {
         resetPracticeState,
         setScreen,
         setSequenceData,
+        sequenceDelay,
     } = usePractice();
 
     const [inputValue, setInputValue] = useState<string>("");
@@ -100,19 +101,18 @@ export default function Practice() {
     }, [isInitialized, operation, isSequential, sequenceCount, numOperands, difficulty, rootValue, timeLimit]);
 
     // === TIMER SEQUENTIAL ===
+    // === TIMER SEQUENTIAL ===
     useEffect(() => {
-        console.log("🔥 TIMER SEQUENTIAL", { isRunning, isSequential, operation, currentSeqIndex, numbersListLength: numbersList.length, showTotalInput });
-
         if (!isRunning || !isSequential || (operation !== 1 && operation !== 2)) return;
         if (showTotalInput) return;
 
-        const delay = 2000;
+        const delay = sequenceDelay * 1000; // 🔥 PAKAI sequenceDelay dari context
+
         const timer = setTimeout(() => {
             const nextIndex = currentSeqIndex + 1;
             if (nextIndex < numbersList.length) {
                 setCurrentSeqIndex(nextIndex);
             } else {
-                console.log("📝 Selesai tampil angka, user harus input!");
                 setShowTotalInput(true);
                 setFeedback({ message: "📝 Sekarang jumlahkan semua angka!", type: "" });
                 if (inputRef.current) inputRef.current.focus();
@@ -121,8 +121,7 @@ export default function Practice() {
 
         setSeqTimer(timer);
         return () => clearTimeout(timer);
-    }, [isRunning, isSequential, operation, currentSeqIndex, numbersList.length, showTotalInput]);
-
+    }, [isRunning, isSequential, operation, currentSeqIndex, numbersList.length, showTotalInput, sequenceDelay]); // 🔥 TAMBAH sequenceDelay DI DEPENDENCY
     // === TIMER UNTUK MODE LANGSUNG ===
     useEffect(() => {
         // Cuma jalan kalau mode langsung (bukan sequential)

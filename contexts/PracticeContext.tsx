@@ -45,6 +45,8 @@ interface PracticeContextType {
     feedback: Feedback;
     setSequenceData: (data: { numbers: number[]; answer: number } | null) => void;
     sequenceData: { numbers: number[]; answer: number } | null;
+    sequenceDelay: number;
+    setSequenceDelay: (val: number) => void;
     setFeedback: (f: Feedback) => void;
     resetPracticeState: () => void;
 }
@@ -73,6 +75,7 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
     const [isAnswered, setIsAnswered] = useState<boolean>(false);
     const [feedback, setFeedback] = useState<Feedback>({ message: "", type: "" });
     const [sequenceData, setSequenceData] = useState<{ numbers: number[]; answer: number } | null>(null);
+    const [sequenceDelay, setSequenceDelay] = useState<number>(2);
 
     const resetPracticeState = () => {
         setQuestions([]);
@@ -125,6 +128,8 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
                 setSequenceData,
                 sequenceData,
                 setFeedback,
+                sequenceDelay,
+                setSequenceDelay,
                 resetPracticeState,
             }}
         >

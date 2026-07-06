@@ -18,6 +18,8 @@ export default function SetupOps() {
         setIsSequential,
         sequenceCount,
         setSequenceCount,
+        sequenceDelay,
+        setSequenceDelay,
     } = usePractice();
 
     const [customTime, setCustomTime] = useState<number>(20);
@@ -166,19 +168,36 @@ export default function SetupOps() {
                         </button>
                     </div>
                     {isSequential && (
-                        <div className="mt-8" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                            <label style={{ fontSize: 14, color: "#94a3b8" }}>Jumlah angka yang ditampilkan:</label>
-                            <select
-                                value={sequenceCount}
-                                onChange={(e) => setSequenceCount(parseInt(e.target.value))}
-                                className="library-select"
-                                style={{ width: 80 }}
-                            >
-                                {[3, 5, 10, 15, 20, 25, 30].map((num) => (
-                                    <option key={num} value={num}>{num}</option>
-                                ))}
-                            </select>
-                            <span style={{ color: "#64748b", fontSize: 12 }}>(setiap angka 2 detik)</span>
+                        <div className="mt-8" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {/* Pilihan jumlah angka (sudah ada) */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                <label style={{ fontSize: 14, color: "#94a3b8" }}>Jumlah angka:</label>
+                                <select
+                                    value={sequenceCount}
+                                    onChange={(e) => setSequenceCount(parseInt(e.target.value))}
+                                    className="library-select"
+                                    style={{ width: 80 }}
+                                >
+                                    {[3, 5, 10, 15, 20, 25, 30].map((num) => (
+                                        <option key={num} value={num}>{num}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* 🔥 TAMBAH: Pilihan kecepatan muncul angka */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                <label style={{ fontSize: 14, color: "#94a3b8" }}>Kecepatan muncul:</label>
+                                <select
+                                    value={sequenceDelay}
+                                    onChange={(e) => setSequenceDelay(parseInt(e.target.value))}
+                                    className="library-select"
+                                    style={{ width: 80 }}
+                                >
+                                    {[1, 2, 3, 4, 5].map((num) => (
+                                        <option key={num} value={num}>{num} detik</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     )}
                 </div>
