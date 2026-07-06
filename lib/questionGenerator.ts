@@ -182,6 +182,38 @@ function generatePower(powerVal: number, diff: string) {
 
     return { display: `${base}${powerStr} = ?`, answer: result };
 }
+export function generateCustomQuestions(
+    operations: number[],
+    order: number[],
+    numOps: number,
+    diff: string,
+    rootVal: number,
+    totalQuestions: number
+) {
+    const questions = [];
+    const opMap = {
+        1: generateAddition,
+        2: generateSubtraction,
+        3: generateMultiplication,
+        4: generateDivision,
+        5: generateRoot,
+        6: generatePower,
+    };
+
+    for (let i = 0; i < totalQuestions; i++) {
+        const opIndex = order[i % order.length];
+        const op = operations[opIndex];
+        const generator = opMap[op as keyof typeof opMap];
+        let q;
+        if (op === 5 || op === 6) {
+            q = generator(rootVal, diff);
+        } else {
+            q = generator(numOps, diff);
+        }
+        questions.push(q);
+    }
+    return questions;
+}
 
 export function generateQuestions(
     op: number,

@@ -66,6 +66,17 @@ export default function Menu() {
                 <p>Pilih operasi yang ingin kamu latih</p>
             </div>
             <div className="menu-grid">
+                {/* ===== TOMBOL CUSTOM LATIHAN ===== */}
+                <div style={{ marginTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20 }}>
+                    <button
+                        className="btn-custom"
+                        onClick={() => setScreen("custom")}
+                    >
+                        <span className="custom-icon">🎨</span>
+                        <span className="custom-label">Custom Latihan</span>
+                        <span className="custom-badge">Bebas Kombinasi!</span>
+                    </button>
+                </div>
                 {operations.map((op) => (
                     <button
                         key={op.id}

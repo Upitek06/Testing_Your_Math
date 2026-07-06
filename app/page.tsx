@@ -7,6 +7,7 @@ import SetUpRoot from "@/components/SetupRoot";
 import Practice from "@/components/Practice";
 import Results from "@/components/Results";
 import Library from "@/components/Library";
+import CustomBuilder from "@/components/CustomBuilder"; // <-- IMPORT
 import { usePractice } from "@/contexts/PracticeContext";
 
 function MainApp() {
@@ -20,6 +21,7 @@ function MainApp() {
       {screen === "practice" && <Practice />}
       {screen === "results" && <Results />}
       {screen === "library" && <Library />}
+      {screen === "custom" && <CustomBuilder />} {/* <-- TAMBAHKAN */}
     </div>
   );
 }
