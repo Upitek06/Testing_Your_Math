@@ -56,34 +56,82 @@ export default function Practice() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // === INISIALISASI ===
-    // === INISIALISASI ===
     useEffect(() => {
-        if (!isInitialized && (operation !== null || isCustom)) {
+        // Custom mode: langsung generate tanpa nunggu operation
+        if (isCustom && !isInitialized) {
             try {
                 const validTime = typeof timeLimit === "number" && timeLimit > 0 ? timeLimit : 10;
 
-                let qs;
+                const qs = generateCustomQuestions(
+                    customOperations,
+                    customOrder,
+                    numOperands,
+                    difficulty,
+                    rootValue,
+                    customTotalQuestions
+                );
 
-                if (isCustom) {
-                    qs = generateCustomQuestions(
-                        customOperations,
-                        customOrder,
-                        numOperands,
-                        difficulty,
-                        rootValue,
-                        customTotalQuestions
-                    );
-                } else if (isSequential && operation !== null && (operation === 1 || operation === 2)) {
-                    qs = generateQuestions(operation, sequenceCount, difficulty, rootValue, 1);
-                } else if (operation !== null) {
-                    qs = generateQuestions(operation, numOperands, difficulty, rootValue, 60);
-                } else {
-                    // fallback kalau operation null dan isCustom false (gak mungkin terjadi)
-                    throw new Error("Operasi tidak valid");
+                if (!qs || qs.length === 0) {
+                    throw new Error("Gagal generate soal custom");
                 }
 
-                // ... sisa kode sama
+                setQuestions(qs);
+                setCurrentIndex(0);
+                setCorrectCount(0);
+                setWrongCount(0);
+                setTotalCount(0);
+                setTimeLeft(validTime);
+                setIsRunning(true);
+                setIsAnswered(false);
+                setFeedback({ message: "", type: "" });
+                setInputValue("");
+                setIsInitialized(true);
+                return; // keluar dari useEffect
+            } catch (error) {
+                console.error("Custom error:", error);
+                setFeedback({ message: "Error generate soal custom", type: "wrong" });
+                return;
+            }
+        }
 
+        // Mode biasa / sequential (kode existing)
+        if (!isInitialized && operation !== null) {
+            try {
+                const validTime = typeof timeLimit === "number" && timeLimit > 0 ? timeLimit : 10;
+                let qs;
+
+                if (isSequential && (operation === 1 || operation === 2)) {
+                    qs = generateQuestions(operation, sequenceCount, difficulty, rootValue, 1);
+                } else {
+                    qs = generateQuestions(operation, numOperands, difficulty, rootValue, 60);
+                }
+
+                if (!qs || qs.length === 0) {
+                    throw new Error("Gagal generate soal");
+                }
+
+                setQuestions(qs);
+                setCurrentIndex(0);
+                setCorrectCount(0);
+                setWrongCount(0);
+                setTotalCount(0);
+
+                if (isSequential && (operation === 1 || operation === 2)) {
+                    const numbers = (qs[0] as any)?.nums || [];
+                    if (numbers.length === 0) {
+                        throw new Error("Tidak ada angka yang di-generate");
+                    }
+                    setNumbersList(numbers);
+                    setCurrentSeqIndex(0);
+                    setShowTotalInput(false);
+                }
+
+                setTimeLeft(validTime);
+                setIsRunning(true);
+                setIsAnswered(false);
+                setFeedback({ message: "", type: "" });
+                setInputValue("");
+                setIsInitialized(true);
             } catch (error) {
                 console.error("Gagal generate soal:", error);
                 setFeedback({ message: "Terjadi error saat memuat soal", type: "wrong" });
@@ -91,7 +139,6 @@ export default function Practice() {
         }
     }, [isInitialized, operation, isCustom, customOperations, customOrder, customTotalQuestions, isSequential, sequenceCount, numOperands, difficulty, rootValue, timeLimit]);
 
-    // === TIMER SEQUENTIAL ===
     // === TIMER SEQUENTIAL ===
     useEffect(() => {
         if (!isRunning || !isSequential || (operation !== 1 && operation !== 2)) return;
