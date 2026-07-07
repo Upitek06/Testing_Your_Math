@@ -182,38 +182,104 @@ function generatePower(powerVal: number, diff: string) {
 
     return { display: `${base}${powerStr} = ?`, answer: result };
 }
+function generateMixedExpression(ops: number[], numOps: number, diff: string) {
+    // Hanya support +, -, ×, ÷ (1-4)
+    const allowedOps = ops.filter(o => o >= 1 && o <= 4);
+    if (allowedOps.length === 0) return { display: "1 + 1 = ?", answer: 2, nums: [1, 1] };
+
+    let rangeMin: number, rangeMax: number;
+    switch (diff) {
+        case "mudah": rangeMin = 1; rangeMax = 10; break;
+        case "sedang": rangeMin = 1; rangeMax = 50; break;
+        case "sulit": rangeMin = 1; rangeMax = 100; break;
+        case "ekstrem": rangeMin = 1; rangeMax = 500; break;
+        default: rangeMin = 1; rangeMax = 10;
+    }
+
+    // Generate angka pertama
+    let nums: number[] = [rand(rangeMin, rangeMax)];
+    let result = nums[0];
+    const opSymbols: string[] = [];
+
+    for (let i = 1; i < numOps; i++) {
+        const op = allowedOps[Math.floor(Math.random() * allowedOps.length)];
+        let nextNum = rand(rangeMin, rangeMax);
+
+        // Logika untuk memastikan hasil tidak negatif / pembagian bulat
+        if (op === 2) { // pengurangan
+            if (result - nextNum < 0) {
+                // jika result < nextNum, kita kecilkan nextNum
+                nextNum = rand(1, Math.max(result, 1));
+            }
+        } else if (op === 4) { // pembagian
+            // Pastikan pembagian bulat dan tidak nol
+            if (result === 0) {
+                nextNum = rand(1, rangeMax);
+            } else {
+                // cari pembagi yang membagi result bulat
+                const divisors = [];
+                for (let d = 1; d <= Math.min(result, rangeMax); d++) {
+                    if (result % d === 0) divisors.push(d);
+                }
+                if (divisors.length > 0) {
+                    nextNum = divisors[Math.floor(Math.random() * divisors.length)];
+                } else {
+                    nextNum = 1;
+                }
+            }
+        }
+
+        nums.push(nextNum);
+        // Simpan simbol operasi
+        if (op === 1) { result += nextNum; opSymbols.push("+"); }
+        else if (op === 2) { result -= nextNum; opSymbols.push("−"); }
+        else if (op === 3) { result *= nextNum; opSymbols.push("×"); }
+        else if (op === 4) {
+            if (nextNum !== 0) result = result / nextNum;
+            else result = 0;
+            opSymbols.push("÷");
+        }
+    }
+
+    // Build display
+    let display = String(nums[0]);
+    for (let i = 0; i < opSymbols.length; i++) {
+        display += ` ${opSymbols[i]} ${nums[i + 1]}`;
+    }
+    display += " = ?";
+
+    // Bulatkan hasil jika desimal
+    const finalAnswer = Math.round(result * 1000) / 1000;
+
+    return {
+        display,
+        answer: finalAnswer,
+        nums: nums,
+    };
+}
 export function generateCustomQuestions(
     operations: number[],
-    order: number[],
+    order: number[], // tidak dipakai lagi, kita random
     numOps: number,
     diff: string,
     rootVal: number,
     totalQuestions: number
 ) {
     const questions = [];
-    const opMap: Record<number, (numOps: number, diff: string) => any> = {
-        1: generateAddition,
-        2: generateSubtraction,
-        3: generateMultiplication,
-        4: generateDivision,
-    };
-    // Akar dan pangkat pakai parameter berbeda
-    const opMapRoot: Record<number, (rootVal: number, diff: string) => any> = {
-        5: generateRoot,
-        6: generatePower,
-    };
-
     for (let i = 0; i < totalQuestions; i++) {
-        const opIndex = order[i % order.length];
-        const op = operations[opIndex];
-
+        // Untuk akar/pangkat, kita buat soal terpisah (tidak mixed)
+        const hasRoot = operations.includes(5);
+        const hasPower = operations.includes(6);
         let q;
-        if (op === 5 || op === 6) {
-            // Akar atau pangkat
-            q = opMapRoot[op](rootVal, diff);
+        if (hasRoot || hasPower) {
+            // Untuk akar/pangkat, tetap buat soal sendiri-sendiri
+            const op = operations[Math.floor(Math.random() * operations.length)];
+            if (op === 5) q = generateRoot(rootVal, diff);
+            else if (op === 6) q = generatePower(rootVal, diff);
+            else q = generateMixedExpression(operations, numOps, diff);
         } else {
-            // Operasi biasa (+, -, ×, ÷)
-            q = opMap[op](numOps, diff);
+            // Mixed expression untuk +, -, ×, ÷
+            q = generateMixedExpression(operations, numOps, diff);
         }
         questions.push(q);
     }

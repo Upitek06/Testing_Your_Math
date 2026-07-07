@@ -76,13 +76,25 @@ export default function Practice() {
                 setCorrectCount(0);
                 setWrongCount(0);
                 setTotalCount(0);
+
+                // 🔥 TAMBAHAN UNTUK SEQUENTIAL CUSTOM
+                if (isSequential) {
+                    const numbers = (qs[0] as any)?.nums || [];
+                    if (numbers.length === 0) {
+                        throw new Error("Tidak ada angka untuk mode bertahap");
+                    }
+                    setNumbersList(numbers);
+                    setCurrentSeqIndex(0);
+                    setShowTotalInput(false);
+                }
+
                 setTimeLeft(timeLimit);
                 setIsRunning(true);
                 setIsAnswered(false);
                 setFeedback({ message: "", type: "" });
                 setInputValue("");
                 setIsInitialized(true);
-                return; // <- PENTING: stop di sini
+                return;
             } catch (error) {
                 console.error("❌ Custom error:", error);
                 setFeedback({ message: "Error: " + String(error), type: "wrong" });
@@ -350,7 +362,7 @@ export default function Practice() {
     }
 
     // === RENDER SEQUENTIAL ===
-    if (isSequential && (operation === 1 || operation === 2)) {
+    if (isSequential && (operation === 1 || operation === 2 || isCustom)) {
         const currentNumber = numbersList[currentSeqIndex];
         const isFinished = showTotalInput;
 
