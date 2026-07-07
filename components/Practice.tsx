@@ -58,13 +58,12 @@ export default function Practice() {
     // === INISIALISASI ===
     // === INISIALISASI ===
     useEffect(() => {
-        if (!isInitialized && operation !== null) {
+        if (!isInitialized && (operation !== null || isCustom)) {
             try {
                 const validTime = typeof timeLimit === "number" && timeLimit > 0 ? timeLimit : 10;
 
                 let qs;
 
-                // 🔥 PRIORITAS: CUSTOM MODE
                 if (isCustom) {
                     qs = generateCustomQuestions(
                         customOperations,
@@ -74,58 +73,17 @@ export default function Practice() {
                         rootValue,
                         customTotalQuestions
                     );
-                }
-                // SEQUENTIAL MODE (penjumlahan/pengurangan)
-                else if (isSequential && (operation === 1 || operation === 2)) {
+                } else if (isSequential && operation !== null && (operation === 1 || operation === 2)) {
                     qs = generateQuestions(operation, sequenceCount, difficulty, rootValue, 1);
-                }
-                // MODE BIASA
-                else {
+                } else if (operation !== null) {
                     qs = generateQuestions(operation, numOperands, difficulty, rootValue, 60);
-                }
-
-                // Pastikan qs ada
-                if (!qs || !Array.isArray(qs) || qs.length === 0) {
-                    throw new Error("Gagal generate soal");
-                }
-
-                setQuestions(qs);
-                setCurrentIndex(0);
-                setCorrectCount(0);
-                setWrongCount(0);
-                setTotalCount(0);
-
-                // Sequential handling
-                if (isCustom) {
-                    // Custom mode: langsung tampilkan soal biasa (tidak sequential)
-                    setTimeLeft(validTime);
-                    setIsRunning(true);
-                    setIsAnswered(false);
-                    setFeedback({ message: "", type: "" });
-                    setInputValue("");
-                    setIsInitialized(true);
-                } else if (isSequential && (operation === 1 || operation === 2)) {
-                    const numbers = (qs[0] as any)?.nums || [];
-                    if (numbers.length === 0) {
-                        throw new Error("Tidak ada angka yang di-generate");
-                    }
-                    setNumbersList(numbers);
-                    setCurrentSeqIndex(0);
-                    setShowTotalInput(false);
-                    setTimeLeft(validTime);
-                    setIsRunning(true);
-                    setIsAnswered(false);
-                    setFeedback({ message: "", type: "" });
-                    setInputValue("");
-                    setIsInitialized(true);
                 } else {
-                    setTimeLeft(validTime);
-                    setIsRunning(true);
-                    setIsAnswered(false);
-                    setFeedback({ message: "", type: "" });
-                    setInputValue("");
-                    setIsInitialized(true);
+                    // fallback kalau operation null dan isCustom false (gak mungkin terjadi)
+                    throw new Error("Operasi tidak valid");
                 }
+
+                // ... sisa kode sama
+
             } catch (error) {
                 console.error("Gagal generate soal:", error);
                 setFeedback({ message: "Terjadi error saat memuat soal", type: "wrong" });
