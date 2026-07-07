@@ -29,6 +29,8 @@ export default function CustomBuilder() {
         setNumOperands,
         timeLimit,
         setTimeLimit,
+        setIsCustom,
+        setOperation,
         resetPracticeState,
     } = usePractice();
 
@@ -59,6 +61,8 @@ export default function CustomBuilder() {
     };
 
     const handleStart = () => {
+        setIsCustom(true);
+        setOperation(1); // <-- INI YANG BENAR
         resetPracticeState();
         setScreen("practice");
     };

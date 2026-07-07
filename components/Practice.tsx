@@ -57,11 +57,10 @@ export default function Practice() {
 
     // === INISIALISASI ===
     useEffect(() => {
-        // Custom mode: langsung generate tanpa nunggu operation
+        // 🔥 PRIORITAS: CUSTOM MODE
         if (isCustom && !isInitialized) {
             try {
-                const validTime = typeof timeLimit === "number" && timeLimit > 0 ? timeLimit : 10;
-
+                console.log("🔥 Generating custom questions...");
                 const qs = generateCustomQuestions(
                     customOperations,
                     customOrder,
@@ -70,26 +69,23 @@ export default function Practice() {
                     rootValue,
                     customTotalQuestions
                 );
-
-                if (!qs || qs.length === 0) {
-                    throw new Error("Gagal generate soal custom");
-                }
+                console.log("✅ Custom questions generated:", qs.length);
 
                 setQuestions(qs);
                 setCurrentIndex(0);
                 setCorrectCount(0);
                 setWrongCount(0);
                 setTotalCount(0);
-                setTimeLeft(validTime);
+                setTimeLeft(timeLimit);
                 setIsRunning(true);
                 setIsAnswered(false);
                 setFeedback({ message: "", type: "" });
                 setInputValue("");
                 setIsInitialized(true);
-                return; // keluar dari useEffect
+                return; // <- PENTING: stop di sini
             } catch (error) {
-                console.error("Custom error:", error);
-                setFeedback({ message: "Error generate soal custom", type: "wrong" });
+                console.error("❌ Custom error:", error);
+                setFeedback({ message: "Error: " + String(error), type: "wrong" });
                 return;
             }
         }
