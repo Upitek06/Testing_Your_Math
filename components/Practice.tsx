@@ -2,7 +2,7 @@
 
 import { usePractice } from "@/contexts/PracticeContext";
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { generateQuestions } from "@/lib/questionGenerator";
+import { generateQuestions, generateCustomQuestions } from "@/lib/questionGenerator";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Practice() {
@@ -36,6 +36,10 @@ export default function Practice() {
         setScreen,
         setSequenceData,
         sequenceDelay,
+        isCustom,
+        customOperations,
+        customOrder,
+        customTotalQuestions,
     } = usePractice();
 
     const [inputValue, setInputValue] = useState<string>("");
@@ -52,16 +56,37 @@ export default function Practice() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // === INISIALISASI ===
+    // === INISIALISASI ===
     useEffect(() => {
         if (!isInitialized && operation !== null) {
             try {
                 const validTime = typeof timeLimit === "number" && timeLimit > 0 ? timeLimit : 10;
 
                 let qs;
-                if (isSequential && (operation === 1 || operation === 2)) {
+
+                // 🔥 PRIORITAS: CUSTOM MODE
+                if (isCustom) {
+                    qs = generateCustomQuestions(
+                        customOperations,
+                        customOrder,
+                        numOperands,
+                        difficulty,
+                        rootValue,
+                        customTotalQuestions
+                    );
+                }
+                // SEQUENTIAL MODE (penjumlahan/pengurangan)
+                else if (isSequential && (operation === 1 || operation === 2)) {
                     qs = generateQuestions(operation, sequenceCount, difficulty, rootValue, 1);
-                } else {
+                }
+                // MODE BIASA
+                else {
                     qs = generateQuestions(operation, numOperands, difficulty, rootValue, 60);
+                }
+
+                // Pastikan qs ada
+                if (!qs || !Array.isArray(qs) || qs.length === 0) {
+                    throw new Error("Gagal generate soal");
                 }
 
                 setQuestions(qs);
@@ -70,11 +95,19 @@ export default function Practice() {
                 setWrongCount(0);
                 setTotalCount(0);
 
-                if (isSequential && (operation === 1 || operation === 2)) {
+                // Sequential handling
+                if (isCustom) {
+                    // Custom mode: langsung tampilkan soal biasa (tidak sequential)
+                    setTimeLeft(validTime);
+                    setIsRunning(true);
+                    setIsAnswered(false);
+                    setFeedback({ message: "", type: "" });
+                    setInputValue("");
+                    setIsInitialized(true);
+                } else if (isSequential && (operation === 1 || operation === 2)) {
                     const numbers = (qs[0] as any)?.nums || [];
-                    console.log("📋 numbersList dari qs[0]:", numbers); // <-- LOG INI
                     if (numbers.length === 0) {
-                        console.error("❌ numbersList KOSONG! qs[0]:", qs[0]);
+                        throw new Error("Tidak ada angka yang di-generate");
                     }
                     setNumbersList(numbers);
                     setCurrentSeqIndex(0);
@@ -98,7 +131,7 @@ export default function Practice() {
                 setFeedback({ message: "Terjadi error saat memuat soal", type: "wrong" });
             }
         }
-    }, [isInitialized, operation, isSequential, sequenceCount, numOperands, difficulty, rootValue, timeLimit]);
+    }, [isInitialized, operation, isCustom, customOperations, customOrder, customTotalQuestions, isSequential, sequenceCount, numOperands, difficulty, rootValue, timeLimit]);
 
     // === TIMER SEQUENTIAL ===
     // === TIMER SEQUENTIAL ===

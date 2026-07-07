@@ -3,48 +3,12 @@
 import { usePractice } from "@/contexts/PracticeContext";
 
 const operations = [
-    {
-        id: 1,
-        label: "Penjumlahan",
-        symbol: "+",
-        color: "#34d399",
-        bg: "rgba(52, 211, 153, 0.15)"
-    },
-    {
-        id: 2,
-        label: "Pengurangan",
-        symbol: "−",
-        color: "#60a5fa",
-        bg: "rgba(96, 165, 250, 0.15)"
-    },
-    {
-        id: 3,
-        label: "Perkalian",
-        symbol: "×",
-        color: "#fbbf24",
-        bg: "rgba(251, 191, 36, 0.15)"
-    },
-    {
-        id: 4,
-        label: "Pembagian",
-        symbol: "÷",
-        color: "#f87171",
-        bg: "rgba(248, 113, 113, 0.15)"
-    },
-    {
-        id: 5,
-        label: "Akar",
-        symbol: "√",
-        color: "#a78bfa",
-        bg: "rgba(167, 139, 250, 0.15)"
-    },
-    {
-        id: 6,
-        label: "Perpangkatan",
-        symbol: "x²",
-        color: "#f472b6",
-        bg: "rgba(244, 114, 182, 0.15)"
-    },
+    { id: 1, label: "Penjumlahan", symbol: "+", color: "#34d399", bg: "rgba(52, 211, 153, 0.15)" },
+    { id: 2, label: "Pengurangan", symbol: "−", color: "#60a5fa", bg: "rgba(96, 165, 250, 0.15)" },
+    { id: 3, label: "Perkalian", symbol: "×", color: "#fbbf24", bg: "rgba(251, 191, 36, 0.15)" },
+    { id: 4, label: "Pembagian", symbol: "÷", color: "#f87171", bg: "rgba(248, 113, 113, 0.15)" },
+    { id: 5, label: "Akar", symbol: "√", color: "#a78bfa", bg: "rgba(167, 139, 250, 0.15)" },
+    { id: 6, label: "Perpangkatan", symbol: "x²", color: "#f472b6", bg: "rgba(244, 114, 182, 0.15)" },
 ];
 
 export default function Menu() {
@@ -65,18 +29,23 @@ export default function Menu() {
                 <h1>🧮 Latihan Matematika</h1>
                 <p>Pilih operasi yang ingin kamu latih</p>
             </div>
-            <div className="menu-grid">
-                {/* ===== TOMBOL CUSTOM LATIHAN ===== */}
-                <div style={{ marginTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20 }}>
-                    <button
-                        className="btn-custom"
-                        onClick={() => setScreen("custom")}
-                    >
-                        <span className="custom-icon">🎨</span>
-                        <span className="custom-label">Custom Latihan</span>
-                        <span className="custom-badge">Bebas Kombinasi!</span>
-                    </button>
+
+            {/* ===== TOMBOL CUSTOM LATIHAN (BANNER BESAR DI ATAS) ===== */}
+            <button
+                className="btn-custom-banner"
+                onClick={() => setScreen("custom")}
+            >
+                <div className="custom-banner-content">
+                    <span className="custom-banner-icon">🎨</span>
+                    <div className="custom-banner-text">
+                        <span className="custom-banner-title">Custom Latihan</span>
+                        <span className="custom-banner-sub">Bebas kombinasi operasi, urutan, dan mode!</span>
+                    </div>
+                    <span className="custom-banner-arrow">→</span>
                 </div>
+            </button>
+
+            <div className="menu-grid">
                 {operations.map((op) => (
                     <button
                         key={op.id}
@@ -102,7 +71,7 @@ export default function Menu() {
             </div>
 
             {/* ===== TOMBOL LIBRARY ===== */}
-            <div style={{ marginTop: 24, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 20 }}>
+            <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}>
                 <button
                     className="btn-library"
                     onClick={() => setScreen("library")}

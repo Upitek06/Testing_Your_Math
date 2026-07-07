@@ -2292,3 +2292,71 @@ select option {
   opacity: 0.3;
   cursor: not-allowed;
 }
+
+/* ===== CUSTOM BANNER ===== */
+.btn-custom-banner {
+  width: 100%;
+  padding: 0;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(245, 158, 11, 0.04));
+  border: 2px solid rgba(251, 191, 36, 0.15);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.btn-custom-banner:hover {
+  transform: translateY(-2px);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 8px 30px rgba(251, 191, 36, 0.08);
+}
+
+.btn-custom-banner:active {
+  transform: scale(0.98);
+}
+
+.custom-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  gap: 16px;
+}
+
+.custom-banner-icon {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.custom-banner-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.custom-banner-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: 0.3px;
+}
+
+.custom-banner-sub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.custom-banner-arrow {
+  font-size: 24px;
+  color: #fbbf24;
+  opacity: 0.6;
+  transition: transform 0.3s ease;
+}
+
+.btn-custom-banner:hover .custom-banner-arrow {
+  transform: translateX(4px);
+  opacity: 1;
+}

@@ -191,11 +191,14 @@ export function generateCustomQuestions(
     totalQuestions: number
 ) {
     const questions = [];
-    const opMap = {
+    const opMap: Record<number, (numOps: number, diff: string) => any> = {
         1: generateAddition,
         2: generateSubtraction,
         3: generateMultiplication,
         4: generateDivision,
+    };
+    // Akar dan pangkat pakai parameter berbeda
+    const opMapRoot: Record<number, (rootVal: number, diff: string) => any> = {
         5: generateRoot,
         6: generatePower,
     };
@@ -203,12 +206,14 @@ export function generateCustomQuestions(
     for (let i = 0; i < totalQuestions; i++) {
         const opIndex = order[i % order.length];
         const op = operations[opIndex];
-        const generator = opMap[op as keyof typeof opMap];
+
         let q;
         if (op === 5 || op === 6) {
-            q = generator(rootVal, diff);
+            // Akar atau pangkat
+            q = opMapRoot[op](rootVal, diff);
         } else {
-            q = generator(numOps, diff);
+            // Operasi biasa (+, -, ×, ÷)
+            q = opMap[op](numOps, diff);
         }
         questions.push(q);
     }
