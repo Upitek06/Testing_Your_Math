@@ -168,38 +168,37 @@ export default function CustomBuilder() {
                 </div>
             )}
 
-            {/* Jumlah Soal */}
-            <div className="form-group">
-                <label>Jumlah soal:</label>
-                <select
-                    value={customTotalQuestions}
-                    onChange={(e) => setCustomTotalQuestions(parseInt(e.target.value))}
-                    className="library-select"
-                    style={{ width: 120 }}
-                >
-                    {[5, 10, 15, 20, 25, 30].map((n) => (
-                        <option key={n} value={n}>{n} soal</option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Jumlah Angka per Soal (hanya untuk mode Langsung) */}
+            {/* Jumlah Soal (hanya untuk mode Langsung) */}
             {!isSequential && (
                 <div className="form-group">
-                    <label>Jumlah angka per soal:</label>
+                    <label>Jumlah soal:</label>
                     <select
-                        value={numOperands}
-                        onChange={(e) => setNumOperands(parseInt(e.target.value))}
+                        value={customTotalQuestions}
+                        onChange={(e) => setCustomTotalQuestions(parseInt(e.target.value))}
                         className="library-select"
-                        style={{ width: 100 }}
+                        style={{ width: 120 }}
                     >
-                        {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                            <option key={n} value={n}>{n} angka</option>
+                        {[5, 10, 15, 20, 25, 30].map((n) => (
+                            <option key={n} value={n}>{n} soal</option>
                         ))}
                     </select>
                 </div>
             )}
 
+            {/* Jumlah Angka per Soal (muncul di kedua mode) */}
+            <div className="form-group">
+                <label>Jumlah angka per soal:</label>
+                <select
+                    value={numOperands}
+                    onChange={(e) => setNumOperands(parseInt(e.target.value))}
+                    className="library-select"
+                    style={{ width: 100 }}
+                >
+                    {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                        <option key={n} value={n}>{n} angka</option>
+                    ))}
+                </select>
+            </div>
             {/* Mode Tampilan */}
             <div className="form-group">
                 <label>Mode tampilan:</label>
@@ -230,6 +229,11 @@ export default function CustomBuilder() {
                                 <option key={n} value={n}>{n} detik</option>
                             ))}
                         </select>
+                    </div>
+                )}
+                {isSequential && (
+                    <div style={{ fontSize: 13, color: "#64748b", marginTop: -8, marginBottom: 12 }}>
+                        ℹ️ Mode bertahap: 1 soal dengan {numOperands} angka yang muncul bergantian
                     </div>
                 )}
             </div>
