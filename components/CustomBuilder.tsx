@@ -104,23 +104,25 @@ export default function CustomBuilder() {
                 </p>
             </div>
 
-            {/* Pilih Operasi */}
+            {/* Pilih Operasi (hanya +, -, ×, ÷) */}
             <div className="form-group">
                 <label>Pilih operasi yang mau dilibatkan:</label>
                 <div className="custom-ops-grid">
-                    {Object.entries(operationNames).map(([key, label]) => {
-                        const op = parseInt(key);
-                        const isActive = customOperations.includes(op);
-                        return (
-                            <button
-                                key={op}
-                                className={`custom-op-btn ${isActive ? "active" : ""}`}
-                                onClick={() => toggleOperation(op)}
-                            >
-                                {label}
-                            </button>
-                        );
-                    })}
+                    {Object.entries(operationNames)
+                        .filter(([key]) => parseInt(key) <= 4) // <-- FILTER: hanya 1-4 (+, -, ×, ÷)
+                        .map(([key, label]) => {
+                            const op = parseInt(key);
+                            const isActive = customOperations.includes(op);
+                            return (
+                                <button
+                                    key={op}
+                                    className={`custom-op-btn ${isActive ? "active" : ""}`}
+                                    onClick={() => toggleOperation(op)}
+                                >
+                                    {label}
+                                </button>
+                            );
+                        })}
                 </div>
             </div>
 
@@ -171,6 +173,23 @@ export default function CustomBuilder() {
                     ))}
                 </select>
             </div>
+
+            {/* Jumlah Angka per Soal (hanya untuk mode Langsung) */}
+            {!isSequential && (
+                <div className="form-group">
+                    <label>Jumlah angka per soal:</label>
+                    <select
+                        value={numOperands}
+                        onChange={(e) => setNumOperands(parseInt(e.target.value))}
+                        className="library-select"
+                        style={{ width: 100 }}
+                    >
+                        {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                            <option key={n} value={n}>{n} angka</option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
             {/* Mode Tampilan */}
             <div className="form-group">
@@ -230,21 +249,6 @@ export default function CustomBuilder() {
                             Custom
                         </button>
                     </div>
-                    {/* Jumlah Angka per Soal */}
-                    <div className="form-group">
-                        <label>Jumlah angka per soal:</label>
-                        <select
-                            value={numOperands}
-                            onChange={(e) => setNumOperands(parseInt(e.target.value))}
-                            className="library-select"
-                            style={{ width: 100 }}
-                        >
-                            {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                                <option key={n} value={n}>{n} angka</option>
-                            ))}
-                        </select>
-                    </div>
-
                     {showCustomTime && (
                         <div className="mt-8" style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <input
