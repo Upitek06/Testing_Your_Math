@@ -397,23 +397,23 @@ export default function Practice() {
 
                 <div className="question-box" style={{ minHeight: 160 }}>
                     {!isFinished ? (
-                        <>
-                            <div className="question-number">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            <div className="question-number" style={{ width: '100%', textAlign: 'center' }}>
                                 Angka ke-{currentSeqIndex + 1} dari {numbersList.length}
                             </div>
                             <div className="question-text" style={{ fontSize: 48, fontWeight: 700, color: "#fbbf24" }}>
                                 {currentNumber}
                             </div>
                             {currentSeqIndex < numbersList.length - 1 && (
-                                <div style={{ fontSize: 28, color: "#a78bfa", marginTop: 8, fontWeight: 600 }}>
+                                <div style={{ fontSize: 40, color: "#a78bfa", fontWeight: 700 }}>
                                     {(currentQuestion as any)?.opSymbols?.[currentSeqIndex] || "?"}
                                 </div>
                             )}
-                        </>
+                        </div>
                     ) : (
                         <>
                             <div className="question-number">🧠 Jumlahkan semua angka yang tadi muncul!</div>
-                            <div className="question-text" style={{ fontSize: 24, color: "#fbbf24", fontWeight: 700 }}>
+                            <div className="question-text" style={{ fontSize: 28, color: "#fbbf24", fontWeight: 700 }}>
                                 ?
                             </div>
                             <div style={{ fontSize: 14, color: "#64748b", marginTop: 8 }}>
