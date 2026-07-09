@@ -157,17 +157,17 @@ export default function CustomBuilder() {
                 </div>
             )}
 
-            {/* Jumlah Angka per Soal */}
+            {/* Jumlah Soal */}
             <div className="form-group">
-                <label>Jumlah angka per soal:</label>
+                <label>Jumlah soal:</label>
                 <select
-                    value={numOperands}
-                    onChange={(e) => setNumOperands(parseInt(e.target.value))}
+                    value={customTotalQuestions}
+                    onChange={(e) => setCustomTotalQuestions(parseInt(e.target.value))}
                     className="library-select"
-                    style={{ width: 100 }}
+                    style={{ width: 120 }}
                 >
-                    {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                        <option key={n} value={n}>{n} angka</option>
+                    {[5, 10, 15, 20, 25, 30].map((n) => (
+                        <option key={n} value={n}>{n} soal</option>
                     ))}
                 </select>
             </div>
@@ -230,6 +230,21 @@ export default function CustomBuilder() {
                             Custom
                         </button>
                     </div>
+                    {/* Jumlah Angka per Soal */}
+                    <div className="form-group">
+                        <label>Jumlah angka per soal:</label>
+                        <select
+                            value={numOperands}
+                            onChange={(e) => setNumOperands(parseInt(e.target.value))}
+                            className="library-select"
+                            style={{ width: 100 }}
+                        >
+                            {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                                <option key={n} value={n}>{n} angka</option>
+                            ))}
+                        </select>
+                    </div>
+
                     {showCustomTime && (
                         <div className="mt-8" style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <input
