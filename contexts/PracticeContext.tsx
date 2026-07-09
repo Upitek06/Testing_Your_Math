@@ -60,8 +60,8 @@ interface PracticeContextType {
     setIsAnswered: React.Dispatch<React.SetStateAction<boolean>>;
     feedback: Feedback;
     setFeedback: (f: Feedback) => void;
-    sequenceData: { numbers: number[]; answer: number } | null;
-    setSequenceData: (data: { numbers: number[]; answer: number } | null) => void;
+    sequenceData: { numbers: number[]; answer: number; opSymbols?: string[] } | null;
+    setSequenceData: (data: { numbers: number[]; answer: number; opSymbols?: string[] } | null) => void;
     resetPracticeState: () => void;
 }
 

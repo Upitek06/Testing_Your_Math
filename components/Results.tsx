@@ -44,7 +44,16 @@ export default function Results() {
             {sequenceData && sequenceData.numbers && sequenceData.numbers.length > 0 && (
                 <div className="sequence-result-box">
                     <div className="sequence-numbers">
-                        {numberString} = ?
+                        {sequenceData.numbers.map((num, idx) => {
+                            const symbol = sequenceData.opSymbols?.[idx] || "";
+                            const isLast = idx === sequenceData.numbers.length - 1;
+                            return (
+                                <span key={idx}>
+                                    {num}
+                                    {!isLast && ` ${symbol} `}
+                                </span>
+                            );
+                        })} = ?
                     </div>
                     <div className="sequence-answer">
                         Jawaban benar: <strong>{sequenceData.answer}</strong>

@@ -306,10 +306,11 @@ export default function Practice() {
         if (timerRef.current) clearTimeout(timerRef.current);
         if (seqTimer) clearTimeout(seqTimer);
 
-        if (isSequential && (operation === 1 || operation === 2) && numbersList.length > 0 && currentQuestion) {
+        if (isSequential && (operation === 1 || operation === 2 || isCustom) && numbersList.length > 0 && currentQuestion) {
             setSequenceData({
                 numbers: numbersList,
                 answer: currentQuestion.answer,
+                opSymbols: (currentQuestion as any)?.opSymbols || [], // <-- TAMBAHKAN INI
             });
         } else {
             setSequenceData(null);
