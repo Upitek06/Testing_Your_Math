@@ -157,21 +157,6 @@ export default function CustomBuilder() {
                 </div>
             )}
 
-            {/* Jumlah Soal */}
-            <div className="form-group">
-                <label>Jumlah soal:</label>
-                <select
-                    value={customTotalQuestions}
-                    onChange={(e) => setCustomTotalQuestions(parseInt(e.target.value))}
-                    className="library-select"
-                    style={{ width: 120 }}
-                >
-                    {[5, 10, 15, 20, 25, 30].map((n) => (
-                        <option key={n} value={n}>{n} soal</option>
-                    ))}
-                </select>
-            </div>
-
             {/* Jumlah Angka per Soal */}
             <div className="form-group">
                 <label>Jumlah angka per soal:</label>
