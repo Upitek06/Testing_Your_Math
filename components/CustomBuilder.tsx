@@ -31,6 +31,15 @@ export default function CustomBuilder() {
         setTimeLimit,
         setIsCustom,
         setOperation,
+        setQuestions,
+        setCurrentIndex,
+        setCorrectCount,
+        setWrongCount,
+        setTotalCount,
+        setIsRunning,
+        setTimeLeft,
+        setIsAnswered,
+        setFeedback,
         resetPracticeState,
     } = usePractice();
 
@@ -61,9 +70,24 @@ export default function CustomBuilder() {
     };
 
     const handleStart = () => {
+        // 🔥 Simpan waktu custom ke timeLimit
+        if (showCustomTime) {
+            setTimeLimit(customTime);
+        }
         setIsCustom(true);
-        setOperation(1); // <-- INI YANG BENAR
-        resetPracticeState();
+        setOperation(1);
+
+        // Reset manual (tanpa pake resetPracticeState)
+        setQuestions([]);
+        setCurrentIndex(0);
+        setCorrectCount(0);
+        setWrongCount(0);
+        setTotalCount(0);
+        setIsRunning(false);
+        setTimeLeft(showCustomTime ? customTime : timeLimit);
+        setIsAnswered(false);
+        setFeedback({ message: "", type: "" });
+
         setScreen("practice");
     };
 

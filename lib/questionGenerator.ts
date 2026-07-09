@@ -255,6 +255,7 @@ function generateMixedExpression(ops: number[], numOps: number, diff: string) {
         display,
         answer: finalAnswer,
         nums: nums,
+        opSymbols: opSymbols, // <-- TAMBAHKAN INI
     };
 }
 export function generateCustomQuestions(

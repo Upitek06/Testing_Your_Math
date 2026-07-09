@@ -389,7 +389,10 @@ export default function Practice() {
                             <span>📝 <span className="stat-value">{totalCount}</span></span>
                         </div>
                     </div>
-                    {/* 🔥 Timer TIDAK ADA di sini */}
+                    {/* 🔥 Timer diganti jadi info jumlah angka */}
+                    <div style={{ fontSize: 14, color: "#94a3b8", background: "rgba(0,0,0,0.2)", padding: "4px 14px", borderRadius: 12 }}>
+                        {!isFinished ? `${currentSeqIndex + 1} / ${numbersList.length}` : "✅ Selesai"}
+                    </div>
                 </div>
 
                 <div className="question-box" style={{ minHeight: 160 }}>
@@ -401,6 +404,11 @@ export default function Practice() {
                             <div className="question-text" style={{ fontSize: 48, fontWeight: 700, color: "#fbbf24" }}>
                                 {currentNumber}
                             </div>
+                            {currentSeqIndex < numbersList.length - 1 && (
+                                <div style={{ fontSize: 28, color: "#a78bfa", marginTop: 8, fontWeight: 600 }}>
+                                    {(currentQuestion as any)?.opSymbols?.[currentSeqIndex] || "?"}
+                                </div>
+                            )}
                         </>
                     ) : (
                         <>
