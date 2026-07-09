@@ -1,7 +1,7 @@
 "use client";
 
 import { usePractice } from "@/contexts/PracticeContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const operationNames = {
     1: "➕ Penjumlahan",
@@ -15,8 +15,10 @@ const operationNames = {
 export default function CustomBuilder() {
     const {
         setScreen,
-        isSequential,
+        setIsCustom,
+        setOperation,
         setIsSequential,
+        isSequential,
         sequenceDelay,
         setSequenceDelay,
         customOperations,
@@ -29,8 +31,7 @@ export default function CustomBuilder() {
         setNumOperands,
         timeLimit,
         setTimeLimit,
-        setIsCustom,
-        setOperation,
+        resetPracticeState,
         setQuestions,
         setCurrentIndex,
         setCorrectCount,
@@ -40,18 +41,28 @@ export default function CustomBuilder() {
         setTimeLeft,
         setIsAnswered,
         setFeedback,
-        resetPracticeState,
     } = usePractice();
 
     const [showCustomTime, setShowCustomTime] = useState(false);
     const [customTime, setCustomTime] = useState(20);
 
-    // Toggle operasi
+    // Reset operasi hanya ke 1-4 (+, -, ×, ÷) saat masuk custom
+    useEffect(() => {
+        const filteredOps = customOperations.filter(op => op <= 4);
+        if (filteredOps.length === 0) {
+            // Default: +, -, ×
+            setCustomOperations([1, 2, 3]);
+            setCustomOrder([0, 1, 2]);
+        } else if (filteredOps.length !== customOperations.length) {
+            setCustomOperations(filteredOps);
+            setCustomOrder(filteredOps.map((_, i) => i));
+        }
+    }, []); // <-- JALAN SEKALI SAJA
+
     const toggleOperation = (op: number) => {
         if (customOperations.includes(op)) {
             const newOps = customOperations.filter((o) => o !== op);
             setCustomOperations(newOps);
-            // Reset order
             setCustomOrder(newOps.map((_, i) => i));
         } else {
             const newOps = [...customOperations, op];
@@ -60,7 +71,6 @@ export default function CustomBuilder() {
         }
     };
 
-    // Pindah urutan (drag sederhana via tombol)
     const moveOrder = (index: number, direction: "up" | "down") => {
         const newOrder = [...customOrder];
         const targetIndex = direction === "up" ? index - 1 : index + 1;
@@ -70,14 +80,13 @@ export default function CustomBuilder() {
     };
 
     const handleStart = () => {
-        // 🔥 Simpan waktu custom ke timeLimit
         if (showCustomTime) {
             setTimeLimit(customTime);
         }
         setIsCustom(true);
         setOperation(1);
 
-        // Reset manual (tanpa pake resetPracticeState)
+        // Reset manual
         setQuestions([]);
         setCurrentIndex(0);
         setCorrectCount(0);
@@ -109,7 +118,7 @@ export default function CustomBuilder() {
                 <label>Pilih operasi yang mau dilibatkan:</label>
                 <div className="custom-ops-grid">
                     {Object.entries(operationNames)
-                        .filter(([key]) => parseInt(key) <= 4) // <-- FILTER: hanya 1-4 (+, -, ×, ÷)
+                        .filter(([key]) => parseInt(key) <= 4)
                         .map(([key, label]) => {
                             const op = parseInt(key);
                             const isActive = customOperations.includes(op);
