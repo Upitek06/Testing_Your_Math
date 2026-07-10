@@ -314,7 +314,7 @@ export default function Practice() {
             });
         } else {
             setSequenceData(null);
-        } x
+        }
 
         setScreen("results");
     }, [isRunning, isSequential, operation, numbersList, currentQuestion, setSequenceData, setScreen]);
