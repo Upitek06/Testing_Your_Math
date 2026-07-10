@@ -23,10 +23,14 @@ function generateAddition(numOps: number, diff: string) {
         if (decimals > 0) nums.push(randFloat(rangeMin, rangeMax, decimals));
         else nums.push(rand(rangeMin, rangeMax));
     }
+    const answer = nums.reduce((a, b) => a + b, 0);
+    const opSymbols = Array(nums.length - 1).fill('+'); // <-- TAMBAHKAN INI
+
     return {
         display: `${nums.join(" + ")} = ?`,
-        answer: nums.reduce((a, b) => a + b, 0),
-        nums: nums, // <-- HARUS ADA INI
+        answer: answer,
+        nums: nums,
+        opSymbols: opSymbols, // <-- TAMBAHKAN INI
     };
 }
 
@@ -63,13 +67,13 @@ function generateSubtraction(numOps: number, diff: string) {
 
     const nums = [first, ...parts];
     const answer = nums.reduce((a, b) => a - b);
-
-    console.log("🔢 generateSubtraction result:", { nums, answer }); // <-- LOG INI
+    const opSymbols = Array(nums.length - 1).fill('−'); // <-- TAMBAHKAN INI
 
     return {
         display: `${nums.join(" − ")} = ?`,
         answer: answer,
-        nums: nums, // <-- PASTIKAN INI ADA
+        nums: nums,
+        opSymbols: opSymbols, // <-- TAMBAHKAN INI
     };
 }
 
