@@ -109,45 +109,47 @@ export default function SetupOps() {
                 <h1 style={{ fontSize: 22 }}>{opNames[operation || 0] || "Operasi"}</h1>
             </div>
 
-            {/* DROPDOWN JUMLAH ANGKA */}
-            <div className="form-group" ref={dropdownRef}>
-                <label>
-                    Jumlah angka operasi <span className="sub-label">(2 – 10)</span>
-                </label>
-                <button
-                    className="dropdown-trigger"
-                    onClick={() => setShowOperandOptions(!showOperandOptions)}
-                    style={{
-                        borderColor: showOperandOptions ? activeColor : "rgba(255,255,255,0.08)",
-                    }}
-                >
-                    <span>{numOperands} angka</span>
-                    <span className={`dropdown-arrow ${showOperandOptions ? "open" : ""}`}>▾</span>
-                </button>
-                <div className={`dropdown-menu ${showOperandOptions ? "open" : ""}`}>
-                    <div className="operand-grid">
-                        {operandOptions.map((num) => (
-                            <button
-                                key={num}
-                                className={`operand-btn ${numOperands === num ? "active" : ""}`}
-                                onClick={() => selectOperand(num)}
-                                style={
-                                    numOperands === num
-                                        ? {
-                                            borderColor: activeColor,
-                                            color: activeColor,
-                                            background: `${activeColor}20`,
-                                            boxShadow: `0 0 20px ${activeColor}30`,
-                                        }
-                                        : {}
-                                }
-                            >
-                                {num}
-                            </button>
-                        ))}
+            {/* ===== DROPDOWN JUMLAH ANGKA (hanya untuk mode Langsung) ===== */}
+            {!(isSequential && (operation === 1 || operation === 2)) && (
+                <div className="form-group" ref={dropdownRef}>
+                    <label>
+                        Jumlah angka operasi <span className="sub-label">(2 – 10)</span>
+                    </label>
+                    <button
+                        className="dropdown-trigger"
+                        onClick={() => setShowOperandOptions(!showOperandOptions)}
+                        style={{
+                            borderColor: showOperandOptions ? activeColor : "rgba(255,255,255,0.08)",
+                        }}
+                    >
+                        <span>{numOperands} angka</span>
+                        <span className={`dropdown-arrow ${showOperandOptions ? "open" : ""}`}>▾</span>
+                    </button>
+                    <div className={`dropdown-menu ${showOperandOptions ? "open" : ""}`}>
+                        <div className="operand-grid">
+                            {operandOptions.map((num) => (
+                                <button
+                                    key={num}
+                                    className={`operand-btn ${numOperands === num ? "active" : ""}`}
+                                    onClick={() => selectOperand(num)}
+                                    style={
+                                        numOperands === num
+                                            ? {
+                                                borderColor: activeColor,
+                                                color: activeColor,
+                                                background: `${activeColor}20`,
+                                                boxShadow: `0 0 20px ${activeColor}30`,
+                                            }
+                                            : {}
+                                    }
+                                >
+                                    {num}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* ===== MODE TAMPILAN (SEQUENTIAL) ===== */}
             {(operation === 1 || operation === 2) && (
