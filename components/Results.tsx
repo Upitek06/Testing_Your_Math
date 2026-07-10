@@ -42,22 +42,26 @@ export default function Results() {
 
             {/* TAMPILAN SEQUENTIAL (deret angka + jawaban) */}
             {sequenceData && sequenceData.numbers && sequenceData.numbers.length > 0 && (
-                <div className="sequence-result-box">
-                    <div className="sequence-numbers">
-                        {sequenceData.numbers.map((num, idx) => {
-                            const symbol = sequenceData.opSymbols?.[idx] || "";
-                            const isLast = idx === sequenceData.numbers.length - 1;
-                            return (
-                                <span key={idx}>
-                                    {num}
-                                    {!isLast && ` ${symbol} `}
-                                </span>
-                            );
-                        })} = ?
-                    </div>
-                    <div className="sequence-answer">
-                        Jawaban benar: <strong>{sequenceData.answer}</strong>
-                    </div>
+                <div className="sequence-numbers">
+                    {sequenceData.numbers.map((num, idx) => {
+                        const symbol = sequenceData.opSymbols?.[idx - 1] || "";
+                        const isLast = idx === sequenceData.numbers.length - 1;
+                        return (
+                            <span key={idx}>
+                                {idx === 0 ? (
+                                    // Angka pertama: polos
+                                    <span style={{ fontWeight: 700, color: "#fbbf24" }}>{num}</span>
+                                ) : (
+                                    // Angka berikutnya: operator + angka
+                                    <span>
+                                        <span style={{ color: "#a78bfa", fontWeight: 700 }}> {symbol} </span>
+                                        <span style={{ fontWeight: 700, color: "#fbbf24" }}>{num}</span>
+                                    </span>
+                                )}
+                                {!isLast && " "}
+                            </span>
+                        );
+                    })} = ?
                 </div>
             )}
 

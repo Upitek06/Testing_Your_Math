@@ -314,7 +314,7 @@ export default function Practice() {
             });
         } else {
             setSequenceData(null);
-        }
+        } x
 
         setScreen("results");
     }, [isRunning, isSequential, operation, numbersList, currentQuestion, setSequenceData, setScreen]);
@@ -398,20 +398,29 @@ export default function Practice() {
 
                 <div className="question-box" style={{ minHeight: 160 }}>
                     {!isFinished ? (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <div className="question-number" style={{ width: '100%', textAlign: 'center' }}>
                                 Angka ke-{currentSeqIndex + 1} dari {numbersList.length}
                             </div>
-                            <div className="question-text" style={{ fontSize: 48, fontWeight: 700, color: "#fbbf24" }}>
-                                {currentNumber}
-                            </div>
-                            {currentSeqIndex < numbersList.length - 1 && (
-                                <div style={{ fontSize: 40, color: "#a78bfa", fontWeight: 700 }}>
-                                    {(currentQuestion as any)?.opSymbols?.[currentSeqIndex] || "?"}
+                            {currentSeqIndex === 0 ? (
+                                // Angka pertama: tampil polos
+                                <div className="question-text" style={{ fontSize: 48, fontWeight: 700, color: "#fbbf24" }}>
+                                    {numbersList[0]}
+                                </div>
+                            ) : (
+                                // Angka berikutnya: operator + angka
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <div style={{ fontSize: 40, color: "#a78bfa", fontWeight: 700 }}>
+                                        {(currentQuestion as any)?.opSymbols?.[currentSeqIndex - 1] || "?"}
+                                    </div>
+                                    <div className="question-text" style={{ fontSize: 48, fontWeight: 700, color: "#fbbf24" }}>
+                                        {currentNumber}
+                                    </div>
                                 </div>
                             )}
                         </div>
                     ) : (
+                        // ... bagian finished (sama)
                         <>
                             <div className="question-number">🧠 Jumlahkan semua angka yang tadi muncul!</div>
                             <div className="question-text" style={{ fontSize: 28, color: "#fbbf24", fontWeight: 700 }}>
