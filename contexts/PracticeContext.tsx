@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, ReactNode } from "react";
 
-type Screen = "menu" | "setupOps" | "setupRootPow" | "practice" | "results" | "library" | "custom";
+type Screen = "menu" | "setupOps" | "setupRootPow" | "practice" | "results" | "library" | "custom" | "numberDiscoPractice" | "numberDiscoSetup";
 type Difficulty = "mudah" | "sedang" | "sulit" | "ekstrem";
 type Feedback = { message: string; type: "" | "correct" | "wrong" };
 
@@ -63,6 +63,15 @@ interface PracticeContextType {
     sequenceData: { numbers: number[]; answer: number; opSymbols?: string[] } | null;
     setSequenceData: (data: { numbers: number[]; answer: number; opSymbols?: string[] } | null) => void;
     resetPracticeState: () => void;
+    isNumberDisco: boolean;
+    setIsNumberDisco: (val: boolean) => void;
+    numberDiscoSettings: {
+        operations: number[];
+        count: number;
+        delay: number;
+        difficulty: string;
+    };
+    setNumberDiscoSettings: (settings: any) => void;
 }
 
 const PracticeContext = createContext<PracticeContextType | undefined>(undefined);
@@ -100,6 +109,13 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
     const [isAnswered, setIsAnswered] = useState<boolean>(false);
     const [feedback, setFeedback] = useState<Feedback>({ message: "", type: "" });
     const [sequenceData, setSequenceData] = useState<{ numbers: number[]; answer: number } | null>(null);
+    const [isNumberDisco, setIsNumberDisco] = useState<boolean>(false);
+    const [numberDiscoSettings, setNumberDiscoSettings] = useState({
+        operations: [1, 2, 3],
+        count: 10,
+        delay: 1.5,
+        difficulty: 'mudah',
+    });
 
     const resetPracticeState = () => {
         setQuestions([]);
@@ -163,6 +179,11 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
                 setFeedback,
                 sequenceData,
                 setSequenceData,
+                isNumberDisco,
+                setIsNumberDisco,
+                numberDiscoSettings,
+                setNumberDiscoSettings,
+
                 resetPracticeState,
             }}
         >

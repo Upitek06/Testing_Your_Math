@@ -8,6 +8,8 @@ import Practice from "@/components/Practice";
 import Results from "@/components/Results";
 import Library from "@/components/Library";
 import CustomBuilder from "@/components/CustomBuilder"; // <-- IMPORT
+import NumberDiscoSetup from "@/components/NumberDiscoSetup";
+import NumberDiscoPractice from "@/components/NumberDiscoPractice";
 import { usePractice } from "@/contexts/PracticeContext";
 
 function MainApp() {

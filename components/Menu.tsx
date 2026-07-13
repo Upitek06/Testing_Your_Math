@@ -81,6 +81,17 @@ export default function Menu() {
                     <span className="library-badge">Perkalian • Pangkat • Akar</span>
                 </button>
             </div>
+            {/* ===== TOMBOL NUMBER DISCO ===== */}
+            <div style={{ marginTop: 12 }}>
+                <button
+                    className="btn-number-disco"
+                    onClick={() => setScreen("numberDiscoSetup")}
+                >
+                    <span className="disco-icon">💃</span>
+                    <span className="disco-label">Number Disco</span>
+                    <span className="disco-badge">✨ Seru!</span>
+                </button>
+            </div>
         </>
     );
 }
