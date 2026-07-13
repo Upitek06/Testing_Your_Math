@@ -19,10 +19,12 @@ export default function NumberDiscoPractice() {
     } = usePractice();
 
     const { operations, count, delay, difficulty } = numberDiscoSettings;
+
     const [questions, setQuestions] = useState<any[]>([]);
+    const [numbersList, setNumbersList] = useState<number[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [currentNumber, setCurrentNumber] = useState<number | null>(null);
-    const [currentOp, setCurrentOp] = useState<string>("");
+    const [currentOp, setCurrentOp] = useState("");
     const [isFinished, setIsFinished] = useState(false);
     const [inputValue, setInputValue] = useState("");
     const [feedback, setFeedback] = useState({ message: "", type: "" });
@@ -30,36 +32,58 @@ export default function NumberDiscoPractice() {
     const [showConfirm, setShowConfirm] = useState(false);
     const [color, setColor] = useState("#fbbf24");
     const [scale, setScale] = useState(1);
-    const [numbersList, setNumbersList] = useState<number[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Generate soal
-    // Generate soal
-    // Generate soal
+    // === GENERATE SOAL ===
     useEffect(() => {
-        const op = operations[Math.floor(Math.random() * operations.length)];
-        const qs = generateQuestions(op, count, difficulty, 2, 1);
-        setQuestions(qs);
-        const nums = (qs[0] as any)?.nums || [];
-        setNumbersList(nums);
-        setCurrentIndex(0);
-        setCurrentNumber(nums[0] || 0);
-        setCurrentOp("");
-        setIsFinished(false);
-        setCorrectCount(0);
-        setWrongCount(0);
-        setTotalCount(0);
-    }, [operations, count, difficulty]); // <-- DEPENDENCY
-    // Timer sequential
-    useEffect(() => {
-        if (!currentNumber || isFinished) return;
+        console.log("🔥 Generating Number Disco...", { operations, count, difficulty });
 
-        const q = questions[currentIndex];
+        // Guard: kalau operations kosong, pake default [1]
+        const safeOps = operations.length > 0 ? operations : [1];
+        const op = safeOps[Math.floor(Math.random() * safeOps.length)];
+
+        try {
+            const qs = generateQuestions(op, count, difficulty, 2, 1);
+            console.log("✅ Questions generated:", qs);
+
+            if (!qs || qs.length === 0) {
+                throw new Error("Gagal generate soal");
+            }
+
+            const nums = (qs[0] as any)?.nums || [];
+            console.log("📊 Numbers list:", nums);
+
+            setQuestions(qs);
+            setNumbersList(nums);
+            setCurrentIndex(0);
+            setCurrentNumber(nums[0] || 0);
+            setCurrentOp("");
+            setIsFinished(false);
+            setIsAnswered(false);
+            setFeedback({ message: "", type: "" });
+            setInputValue("");
+            setCorrectCount(0);
+            setWrongCount(0);
+            setTotalCount(0);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("❌ Error generate:", error);
+            setFeedback({ message: "Error generate soal", type: "wrong" });
+            setIsLoading(false);
+        }
+    }, [operations, count, difficulty]);
+
+    // === TIMER SEQUENTIAL ===
+    useEffect(() => {
+        if (isLoading || !currentNumber || isFinished || questions.length === 0) return;
+
+        const q = questions[0];
         if (!q) return;
-
-        const nums = q.nums || [];
-        const ops = q.opSymbols || [];
+        const nums = numbersList;
+        const ops = (q as any)?.opSymbols || [];
 
         const timer = setTimeout(() => {
             const nextIdx = currentIndex + 1;
@@ -79,10 +103,11 @@ export default function NumberDiscoPractice() {
 
         timerRef.current = timer;
         return () => clearTimeout(timer);
-    }, [currentIndex, currentNumber, isFinished, questions, delay]);
+    }, [currentIndex, currentNumber, isFinished, questions, numbersList, delay, isLoading]);
 
+    // === HANDLE ANSWER ===
     const handleAnswer = () => {
-        if (!isFinished || isAnswered) return;
+        if (!isFinished || isAnswered || questions.length === 0) return;
         const val = parseFloat(inputValue);
         if (isNaN(val)) {
             setFeedback({ message: "⚠️ Masukkan angka!", type: "wrong" });
@@ -106,8 +131,9 @@ export default function NumberDiscoPractice() {
         }, 2000);
     };
 
+    // === QUIT ===
     const handleQuit = () => {
-        if (isFinished) {
+        if (isFinished || isAnswered) {
             setShowConfirm(true);
         } else {
             setIsNumberDisco(false);
@@ -116,7 +142,32 @@ export default function NumberDiscoPractice() {
         }
     };
 
-    if (!currentNumber) return <div>Memuat...</div>;
+    // === LOADING ===
+    if (isLoading) {
+        return (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+                <div style={{ fontSize: 18, marginBottom: 20 }}>⏳ Memuat Number Disco...</div>
+            </div>
+        );
+    }
+
+    // === GUARD: KALO CURRENT NUMBER NULL ===
+    if (currentNumber === null || currentNumber === undefined) {
+        return (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+                <div style={{ fontSize: 18, marginBottom: 20 }}>⚠️ Gagal memuat angka, coba lagi.</div>
+                <button
+                    className="btn btn-outline"
+                    onClick={() => {
+                        setIsNumberDisco(false);
+                        setScreen("menu");
+                    }}
+                >
+                    Kembali ke Menu
+                </button>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -144,9 +195,9 @@ export default function NumberDiscoPractice() {
                         <span>📝 <span className="stat-value">{totalCount}</span></span>
                     </div>
                 </div>
-                {!isFinished && (
+                {!isFinished && numbersList.length > 0 && (
                     <div style={{ fontSize: 14, color: "#94a3b8", background: "rgba(0,0,0,0.2)", padding: "4px 14px", borderRadius: 12 }}>
-                        {currentIndex + 1} / {questions[0]?.nums?.length || 0}
+                        {currentIndex + 1} / {numbersList.length}
                     </div>
                 )}
             </div>
@@ -172,7 +223,7 @@ export default function NumberDiscoPractice() {
                         }}>
                             {currentNumber}
                         </div>
-                        {currentIndex > 0 && (
+                        {currentIndex > 0 && currentOp && (
                             <div style={{ fontSize: 32, color: "#a78bfa", fontWeight: 600 }}>
                                 {currentOp}
                             </div>
@@ -182,7 +233,7 @@ export default function NumberDiscoPractice() {
                     <>
                         <div className="question-number">📝 Jumlahkan semua angka!</div>
                         <div className="question-text" style={{ fontSize: 24, color: "#94a3b8" }}>
-                            {questions[0]?.nums?.join(" + ")} = ?
+                            {numbersList.join(" + ")} = ?
                         </div>
                         <div className="answer-area" style={{ marginTop: 16 }}>
                             <input
