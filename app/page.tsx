@@ -24,6 +24,8 @@ function MainApp() {
       {screen === "results" && <Results />}
       {screen === "library" && <Library />}
       {screen === "custom" && <CustomBuilder />} {/* <-- TAMBAHKAN */}
+      {screen === "numberDiscoSetup" && <NumberDiscoSetup />}
+      {screen === "numberDiscoPractice" && <NumberDiscoPractice />}
     </div>
   );
 }
