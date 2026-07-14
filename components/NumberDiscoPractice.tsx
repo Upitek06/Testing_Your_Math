@@ -5,8 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { generateQuestions } from "@/lib/questionGenerator";
 import ConfirmModal from "@/components/ConfirmModal";
 
-const discoColors = ["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24", "#f87171", "#fb923c"];
-
 export default function NumberDiscoPractice() {
     const {
         numberDiscoSettings,
@@ -18,28 +16,21 @@ export default function NumberDiscoPractice() {
         totalCount, setTotalCount,
     } = usePractice();
 
-    console.log("🔥 NumberDiscoPractice mounted, settings:", numberDiscoSettings);
+    const { operations, count, delay, difficulty, colorA, colorB } = numberDiscoSettings;
 
-    // FALLBACK: kalo settings kosong, pake default
-    const operations = numberDiscoSettings?.operations?.length > 0 ? numberDiscoSettings.operations : [1, 2, 3];
-    const count = numberDiscoSettings?.count || 10;
-    const delay = numberDiscoSettings?.delay || 1.5;
-    const difficulty = numberDiscoSettings?.difficulty || "mudah";
-
-    console.log("📊 Parsed settings:", { operations, count, delay, difficulty });
-
-    const [questions, setQuestions] = useState<any[]>([]);
-    const [numbersList, setNumbersList] = useState<number[]>([]);
+    const [numbersA, setNumbersA] = useState<number[]>([]);
+    const [numbersB, setNumbersB] = useState<number[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [currentNumber, setCurrentNumber] = useState<number | null>(null);
-    const [currentOp, setCurrentOp] = useState("");
+    const [currentA, setCurrentA] = useState<number | null>(null);
+    const [currentB, setCurrentB] = useState<number | null>(null);
+    const [activeZone, setActiveZone] = useState<'A' | 'B'>('A');
     const [isFinished, setIsFinished] = useState(false);
     const [inputValue, setInputValue] = useState("");
     const [feedback, setFeedback] = useState({ message: "", type: "" });
     const [isAnswered, setIsAnswered] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-    const [color, setColor] = useState("#fbbf24");
-    const [scale, setScale] = useState(1);
+    const [scaleA, setScaleA] = useState(1);
+    const [scaleB, setScaleB] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -48,37 +39,34 @@ export default function NumberDiscoPractice() {
 
     // === GENERATE SOAL ===
     useEffect(() => {
-        console.log("🔥 Generating Number Disco...");
         setIsLoading(true);
         setErrorMsg("");
 
         try {
-            const op = operations[Math.floor(Math.random() * operations.length)];
-            console.log("🎯 Selected operation:", op, "count:", count, "difficulty:", difficulty);
+            const safeOps = operations.length > 0 ? operations : [1];
+            const op = safeOps[Math.floor(Math.random() * safeOps.length)];
 
-            if (!op) {
-                throw new Error("Tidak ada operasi yang dipilih");
+            // Generate 2 set angka: zona A dan zona B
+            const qsA = generateQuestions(op, count, difficulty, 2, 1);
+            const qsB = generateQuestions(op, count, difficulty, 2, 1);
+
+            if (!qsA || qsA.length === 0 || !qsB || qsB.length === 0) {
+                throw new Error("Gagal generate soal");
             }
 
-            const qs = generateQuestions(op, count, difficulty, 2, 1);
-            console.log("✅ Questions generated:", qs);
+            const numsA = (qsA[0] as any)?.nums || [];
+            const numsB = (qsB[0] as any)?.nums || [];
 
-            if (!qs || qs.length === 0) {
-                throw new Error("generateQuestions return kosong");
-            }
-
-            const nums = (qs[0] as any)?.nums || [];
-            console.log("📊 Numbers list:", nums);
-
-            if (nums.length === 0) {
+            if (numsA.length === 0 || numsB.length === 0) {
                 throw new Error("Tidak ada angka yang di-generate");
             }
 
-            setQuestions(qs);
-            setNumbersList(nums);
+            setNumbersA(numsA);
+            setNumbersB(numsB);
             setCurrentIndex(0);
-            setCurrentNumber(nums[0]);
-            setCurrentOp("");
+            setCurrentA(numsA[0] || 0);
+            setCurrentB(null);
+            setActiveZone('A');
             setIsFinished(false);
             setIsAnswered(false);
             setFeedback({ message: "", type: "" });
@@ -94,58 +82,71 @@ export default function NumberDiscoPractice() {
         }
     }, [operations, count, difficulty]);
 
-    // === TIMER SEQUENTIAL ===
+    // === TIMER BERGANIAN ===
     useEffect(() => {
-        console.log("⏱️ Timer effect:", { isLoading, currentNumber, isFinished, questionsLength: questions.length });
+        if (isLoading || isFinished || numbersA.length === 0 || numbersB.length === 0) return;
 
-        if (isLoading || currentNumber === null || isFinished || questions.length === 0) return;
-
-        const q = questions[0];
-        if (!q) return;
-        const nums = numbersList;
-        const ops = (q as any)?.opSymbols || [];
-
-        console.log("⏱️ Setting timer for index:", currentIndex, "total:", nums.length);
+        const totalSteps = numbersA.length + numbersB.length;
+        if (currentIndex >= totalSteps) {
+            setIsFinished(true);
+            setFeedback({ message: "📝 Jumlahkan semua angka!", type: "" });
+            if (inputRef.current) inputRef.current.focus();
+            return;
+        }
 
         const timer = setTimeout(() => {
             const nextIdx = currentIndex + 1;
-            if (nextIdx < nums.length) {
-                console.log("➡️ Next number:", nums[nextIdx]);
-                setCurrentNumber(nums[nextIdx]);
-                setCurrentOp(ops[nextIdx - 1] || "");
-                setCurrentIndex(nextIdx);
-                setColor(discoColors[Math.floor(Math.random() * discoColors.length)]);
-                setScale(0.5);
-                setTimeout(() => setScale(1), 100);
+            const isEven = nextIdx % 2 === 0;
+
+            if (isEven) {
+                // Zona A
+                const idxA = Math.floor(nextIdx / 2);
+                if (idxA < numbersA.length) {
+                    setCurrentA(numbersA[idxA]);
+                    setActiveZone('A');
+                    setScaleA(0.5);
+                    setTimeout(() => setScaleA(1), 100);
+                }
             } else {
-                console.log("📝 All numbers shown, waiting for answer");
-                setIsFinished(true);
-                setFeedback({ message: "📝 Jumlahkan semua angka!", type: "" });
-                if (inputRef.current) inputRef.current.focus();
+                // Zona B
+                const idxB = Math.floor(nextIdx / 2);
+                if (idxB < numbersB.length) {
+                    setCurrentB(numbersB[idxB]);
+                    setActiveZone('B');
+                    setScaleB(0.5);
+                    setTimeout(() => setScaleB(1), 100);
+                }
             }
+
+            setCurrentIndex(nextIdx);
         }, delay * 1000);
 
         timerRef.current = timer;
         return () => clearTimeout(timer);
-    }, [currentIndex, currentNumber, isFinished, questions, numbersList, delay, isLoading]);
+    }, [currentIndex, isLoading, isFinished, numbersA, numbersB, delay]);
 
     // === HANDLE ANSWER ===
     const handleAnswer = () => {
-        if (!isFinished || isAnswered || questions.length === 0) return;
+        if (!isFinished || isAnswered) return;
         const val = parseFloat(inputValue);
         if (isNaN(val)) {
             setFeedback({ message: "⚠️ Masukkan angka!", type: "wrong" });
             return;
         }
-        const q = questions[0];
-        const correct = Math.abs(val - q.answer) < 0.001;
+
+        // Jawaban yang diharapkan: jumlah seluruh angka (A + B)
+        const totalA = numbersA.reduce((a, b) => a + b, 0);
+        const totalB = numbersB.reduce((a, b) => a + b, 0);
+        const expectedAnswer = totalA + totalB;
+
+        const correct = Math.abs(val - expectedAnswer) < 0.001;
         setTotalCount(prev => prev + 1);
         if (correct) {
             setCorrectCount(prev => prev + 1);
-            setFeedback({ message: `✅ Benar! Jawaban: ${q.answer}`, type: "correct" });
+            setFeedback({ message: `✅ Benar! Jawaban: ${expectedAnswer}`, type: "correct" });
         } else {
             setWrongCount(prev => prev + 1);
-            setFeedback({ message: `❌ Salah! Jawaban: ${q.answer}`, type: "wrong" });
+            setFeedback({ message: `❌ Salah! Jawaban: ${expectedAnswer}`, type: "wrong" });
         }
         setIsAnswered(true);
         setTimeout(() => {
@@ -160,10 +161,23 @@ export default function NumberDiscoPractice() {
         if (isFinished || isAnswered) {
             setShowConfirm(true);
         } else {
+            if (timerRef.current) clearTimeout(timerRef.current);
             setIsNumberDisco(false);
             resetPracticeState();
             setScreen("menu");
         }
+    };
+
+    const confirmQuit = () => {
+        setShowConfirm(false);
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setIsNumberDisco(false);
+        resetPracticeState();
+        setScreen("menu");
+    };
+
+    const cancelQuit = () => {
+        setShowConfirm(false);
     };
 
     // === LOADING ===
@@ -194,8 +208,8 @@ export default function NumberDiscoPractice() {
         );
     }
 
-    // === GUARD: KALO CURRENT NUMBER NULL ===
-    if (currentNumber === null || currentNumber === undefined) {
+    // === GUARD: KALO ANGKA NULL ===
+    if (currentA === null) {
         return (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
                 <div style={{ fontSize: 18, marginBottom: 20, color: "#f87171" }}>⚠️ Gagal memuat angka, coba lagi.</div>
@@ -212,19 +226,17 @@ export default function NumberDiscoPractice() {
         );
     }
 
+    // === RENDER ===
     return (
         <>
             <ConfirmModal
                 isOpen={showConfirm}
-                onConfirm={() => {
-                    setShowConfirm(false);
-                    setIsNumberDisco(false);
-                    resetPracticeState();
-                    setScreen("menu");
-                }}
-                onCancel={() => setShowConfirm(false)}
+                onConfirm={confirmQuit}
+                onCancel={cancelQuit}
                 title="Keluar?"
                 message="Yakin ingin keluar dari Number Disco?"
+                confirmText="Ya, Keluar"
+                cancelText="Batalkan"
             />
 
             <div className="practice-header">
@@ -238,47 +250,90 @@ export default function NumberDiscoPractice() {
                         <span>📝 <span className="stat-value">{totalCount}</span></span>
                     </div>
                 </div>
-                {!isFinished && numbersList.length > 0 && (
+                {!isFinished && (
                     <div style={{ fontSize: 14, color: "#94a3b8", background: "rgba(0,0,0,0.2)", padding: "4px 14px", borderRadius: 12 }}>
-                        {currentIndex + 1} / {numbersList.length}
+                        {Math.min(currentIndex + 1, numbersA.length + numbersB.length)} / {numbersA.length + numbersB.length}
                     </div>
                 )}
             </div>
 
-            <div className="question-box" style={{ minHeight: 200, background: "rgba(0,0,0,0.3)" }}>
+            <div className="question-box" style={{
+                minHeight: 300,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '24px 16px'
+            }}>
                 {!isFinished ? (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '12px',
-                        flexDirection: 'column',
-                        transition: 'all 0.3s',
-                    }}>
-                        <div className="question-number">Angka ke-{currentIndex + 1}</div>
+                    <>
+                        {/* Zona A */}
                         <div style={{
-                            fontSize: 72,
-                            fontWeight: 700,
-                            color: color,
-                            textShadow: `0 0 40px ${color}40, 0 0 80px ${color}20`,
-                            transform: `scale(${scale})`,
-                            transition: 'transform 0.15s ease-out',
+                            width: '100%',
+                            padding: '16px 20px',
+                            borderRadius: 16,
+                            background: `${colorA}20`,
+                            border: `3px solid ${colorA}`,
+                            textAlign: 'center',
+                            transition: 'all 0.3s ease',
+                            opacity: activeZone === 'A' ? 1 : 0.4,
+                            transform: activeZone === 'A' ? 'scale(1.02)' : 'scale(1)',
                         }}>
-                            {currentNumber}
-                        </div>
-                        {currentIndex > 0 && currentOp && (
-                            <div style={{ fontSize: 32, color: "#a78bfa", fontWeight: 600 }}>
-                                {currentOp}
+                            <div style={{ fontSize: 14, color: colorA, fontWeight: 600, marginBottom: 4 }}>ZONA A</div>
+                            <div style={{
+                                fontSize: 56,
+                                fontWeight: 700,
+                                color: colorA,
+                                transform: `scale(${scaleA})`,
+                                transition: 'transform 0.15s ease-out',
+                                textShadow: activeZone === 'A' ? `0 0 40px ${colorA}40` : 'none',
+                            }}>
+                                {currentA !== null ? currentA : '?'}
                             </div>
-                        )}
-                    </div>
+                        </div>
+
+                        {/* Zona B */}
+                        <div style={{
+                            width: '100%',
+                            padding: '16px 20px',
+                            borderRadius: 16,
+                            background: `${colorB}20`,
+                            border: `3px solid ${colorB}`,
+                            textAlign: 'center',
+                            transition: 'all 0.3s ease',
+                            opacity: activeZone === 'B' ? 1 : 0.4,
+                            transform: activeZone === 'B' ? 'scale(1.02)' : 'scale(1)',
+                        }}>
+                            <div style={{ fontSize: 14, color: colorB, fontWeight: 600, marginBottom: 4 }}>ZONA B</div>
+                            <div style={{
+                                fontSize: 56,
+                                fontWeight: 700,
+                                color: colorB,
+                                transform: `scale(${scaleB})`,
+                                transition: 'transform 0.15s ease-out',
+                                textShadow: activeZone === 'B' ? `0 0 40px ${colorB}40` : 'none',
+                            }}>
+                                {currentB !== null ? currentB : '?'}
+                            </div>
+                        </div>
+
+                        {/* Indikator progress */}
+                        <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
+                            {activeZone === 'A' ? '⬆️ Zona A aktif' : '⬇️ Zona B aktif'}
+                        </div>
+                    </>
                 ) : (
                     <>
-                        <div className="question-number">📝 Jumlahkan semua angka!</div>
-                        <div className="question-text" style={{ fontSize: 24, color: "#94a3b8" }}>
-                            {numbersList.join(" + ")} = ?
+                        <div className="question-number" style={{ fontSize: 18 }}>📝 Jumlahkan semua angka!</div>
+                        <div className="question-text" style={{ fontSize: 20, color: "#94a3b8", textAlign: 'center' }}>
+                            <div style={{ color: colorA }}>Zona A: {numbersA.join(' + ')}</div>
+                            <div style={{ color: colorB, marginTop: 4 }}>Zona B: {numbersB.join(' + ')}</div>
+                            <div style={{ marginTop: 8, fontWeight: 600, color: '#fbbf24' }}>
+                                Total = ?
+                            </div>
                         </div>
-                        <div className="answer-area" style={{ marginTop: 16 }}>
+                        <div className="answer-area" style={{ marginTop: 16, width: '100%', maxWidth: 400, display: 'flex', gap: 12 }}>
                             <input
                                 ref={inputRef}
                                 type="text"
@@ -289,7 +344,7 @@ export default function NumberDiscoPractice() {
                                 placeholder="Jumlah total..."
                                 disabled={isAnswered}
                                 autoComplete="off"
-                                style={{ width: 200 }}
+                                style={{ flex: 1, padding: '12px 16px', fontSize: 18, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff' }}
                             />
                             <button className="btn btn-primary" onClick={handleAnswer} disabled={isAnswered}>
                                 Kirim

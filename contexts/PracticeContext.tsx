@@ -70,6 +70,8 @@ interface PracticeContextType {
         count: number;
         delay: number;
         difficulty: string;
+        colorA: string;
+        colorB: string;
     };
     setNumberDiscoSettings: (settings: any) => void;
 }
@@ -111,10 +113,12 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
     const [sequenceData, setSequenceData] = useState<{ numbers: number[]; answer: number } | null>(null);
     const [isNumberDisco, setIsNumberDisco] = useState<boolean>(false);
     const [numberDiscoSettings, setNumberDiscoSettings] = useState({
-        operations: [1, 2, 3],
+        operations: [1, 2],
         count: 10,
         delay: 1.5,
         difficulty: 'mudah',
+        colorA: '#f472b6', // default pink
+        colorB: '#60a5fa', // default biru
     });
 
     const resetPracticeState = () => {

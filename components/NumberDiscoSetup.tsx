@@ -16,6 +16,13 @@ export default function NumberDiscoSetup() {
     const [tempCount, setTempCount] = useState(numberDiscoSettings.count);
     const [tempDelay, setTempDelay] = useState(numberDiscoSettings.delay);
     const [tempDiff, setTempDiff] = useState(numberDiscoSettings.difficulty);
+    const [colorA, setColorA] = useState(numberDiscoSettings.colorA || '#f472b6');
+    const [colorB, setColorB] = useState(numberDiscoSettings.colorB || '#60a5fa');
+
+    const colorPalette = [
+        '#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24',
+        '#f87171', '#fb923c', '#e879f9', '#22d3ee', '#fca5a5'
+    ];
 
     const toggleOp = (op: number) => {
         if (tempOps.includes(op)) setTempOps(tempOps.filter(o => o !== op));
@@ -28,6 +35,8 @@ export default function NumberDiscoSetup() {
             count: tempCount,
             delay: tempDelay,
             difficulty: tempDiff,
+            colorA,
+            colorB,
         });
         setIsNumberDisco(true);
         resetPracticeState();
@@ -75,6 +84,34 @@ export default function NumberDiscoSetup() {
                 <select value={tempDelay} onChange={(e) => setTempDelay(parseFloat(e.target.value))} className="library-select" style={{ width: 100 }}>
                     {[0.5, 1, 1.5, 2, 2.5, 3].map(n => <option key={n} value={n}>{n}s</option>)}
                 </select>
+            </div>
+
+            <div className="form-group">
+                <label>Warna Zona A (atas):</label>
+                <div className="color-picker-group">
+                    {colorPalette.map(c => (
+                        <button
+                            key={c}
+                            className={`color-btn ${colorA === c ? 'active' : ''}`}
+                            style={{ background: c }}
+                            onClick={() => setColorA(c)}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            <div className="form-group">
+                <label>Warna Zona B (bawah):</label>
+                <div className="color-picker-group">
+                    {colorPalette.map(c => (
+                        <button
+                            key={c}
+                            className={`color-btn ${colorB === c ? 'active' : ''}`}
+                            style={{ background: c }}
+                            onClick={() => setColorB(c)}
+                        />
+                    ))}
+                </div>
             </div>
 
             <div className="form-group">

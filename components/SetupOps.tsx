@@ -149,7 +149,7 @@ export default function SetupOps() {
                         </div>
                     </div>
                 </div>
-            )}
+            )}~
 
             {/* ===== MODE TAMPILAN (SEQUENTIAL) ===== */}
             {(operation === 1 || operation === 2) && (
