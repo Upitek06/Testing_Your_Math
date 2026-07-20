@@ -2436,3 +2436,36 @@ select option {
   border-color: #fff;
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
 }
+
+/* Color Picker */
+.color-picker-simple {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.color-picker-input {
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  background: transparent;
+}
+
+.color-picker-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.color-hex {
+  font-size: 14px;
+  color: #94a3b8;
+  font-family: monospace;
+}

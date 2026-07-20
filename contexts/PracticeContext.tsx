@@ -117,8 +117,8 @@ export const PracticeProvider = ({ children }: { children: ReactNode }) => {
         count: 10,
         delay: 1.5,
         difficulty: 'mudah',
-        colorA: '#f472b6', // default pink
-        colorB: '#60a5fa', // default biru
+        colorA: '#f472b6',
+        colorB: '#60a5fa',
     });
 
     const resetPracticeState = () => {

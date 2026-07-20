@@ -11,31 +11,39 @@ export default function NumberDiscoPractice() {
         setIsNumberDisco,
         setScreen,
         resetPracticeState,
-        correctCount, setCorrectCount,
-        wrongCount, setWrongCount,
-        totalCount, setTotalCount,
     } = usePractice();
 
     const { operations, count, delay, difficulty, colorA, colorB } = numberDiscoSettings;
 
+    // State untuk angka
     const [numbersA, setNumbersA] = useState<number[]>([]);
     const [numbersB, setNumbersB] = useState<number[]>([]);
+    const [opSymbolsA, setOpSymbolsA] = useState<string[]>([]);
+    const [opSymbolsB, setOpSymbolsB] = useState<string[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [currentA, setCurrentA] = useState<number | null>(null);
-    const [currentB, setCurrentB] = useState<number | null>(null);
+    const [displayA, setDisplayA] = useState<number | null>(null);
+    const [displayB, setDisplayB] = useState<number | null>(null);
+    const [showOpA, setShowOpA] = useState<string>("");
+    const [showOpB, setShowOpB] = useState<string>("");
     const [activeZone, setActiveZone] = useState<'A' | 'B'>('A');
     const [isFinished, setIsFinished] = useState(false);
-    const [inputValue, setInputValue] = useState("");
-    const [feedback, setFeedback] = useState({ message: "", type: "" });
-    const [isAnswered, setIsAnswered] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
-    const [scaleA, setScaleA] = useState(1);
-    const [scaleB, setScaleB] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState("");
 
+    // State untuk jawaban (2 kolom)
+    const [answerA, setAnswerA] = useState("");
+    const [answerB, setAnswerB] = useState("");
+    const [isAnswered, setIsAnswered] = useState(false);
+    const [feedback, setFeedback] = useState({ message: "", type: "" });
+
+    // State untuk UI
+    const [scaleA, setScaleA] = useState(1);
+    const [scaleB, setScaleB] = useState(1);
+    const [showConfirm, setShowConfirm] = useState(false);
+
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputARef = useRef<HTMLInputElement>(null);
+    const inputBRef = useRef<HTMLInputElement>(null);
 
     // === GENERATE SOAL ===
     useEffect(() => {
@@ -46,37 +54,42 @@ export default function NumberDiscoPractice() {
             const safeOps = operations.length > 0 ? operations : [1];
             const op = safeOps[Math.floor(Math.random() * safeOps.length)];
 
-            // Generate 2 set angka: zona A dan zona B
             const qsA = generateQuestions(op, count, difficulty, 2, 1);
             const qsB = generateQuestions(op, count, difficulty, 2, 1);
 
-            if (!qsA || qsA.length === 0 || !qsB || qsB.length === 0) {
+            if (!qsA || !qsB || qsA.length === 0 || qsB.length === 0) {
                 throw new Error("Gagal generate soal");
             }
 
             const numsA = (qsA[0] as any)?.nums || [];
             const numsB = (qsB[0] as any)?.nums || [];
+            const opsA = (qsA[0] as any)?.opSymbols || [];
+            const opsB = (qsB[0] as any)?.opSymbols || [];
 
             if (numsA.length === 0 || numsB.length === 0) {
-                throw new Error("Tidak ada angka yang di-generate");
+                throw new Error("Tidak ada angka yang digenerate");
             }
 
             setNumbersA(numsA);
             setNumbersB(numsB);
+            setOpSymbolsA(opsA);
+            setOpSymbolsB(opsB);
             setCurrentIndex(0);
-            setCurrentA(numsA[0] || 0);
-            setCurrentB(null);
+            setDisplayA(numsA[0]);
+            setDisplayB(null);
+            setShowOpA("");
+            setShowOpB("");
             setActiveZone('A');
             setIsFinished(false);
             setIsAnswered(false);
+            setAnswerA("");
+            setAnswerB("");
             setFeedback({ message: "", type: "" });
-            setInputValue("");
-            setCorrectCount(0);
-            setWrongCount(0);
-            setTotalCount(0);
+            setScaleA(1);
+            setScaleB(1);
             setIsLoading(false);
         } catch (error) {
-            console.error("❌ Error generate:", error);
+            console.error("Error generate:", error);
             setErrorMsg(String(error));
             setIsLoading(false);
         }
@@ -89,8 +102,8 @@ export default function NumberDiscoPractice() {
         const totalSteps = numbersA.length + numbersB.length;
         if (currentIndex >= totalSteps) {
             setIsFinished(true);
-            setFeedback({ message: "📝 Jumlahkan semua angka!", type: "" });
-            if (inputRef.current) inputRef.current.focus();
+            setFeedback({ message: "📝 Masukkan jawaban untuk kedua zona!", type: "" });
+            if (inputARef.current) inputARef.current.focus();
             return;
         }
 
@@ -102,19 +115,27 @@ export default function NumberDiscoPractice() {
                 // Zona A
                 const idxA = Math.floor(nextIdx / 2);
                 if (idxA < numbersA.length) {
-                    setCurrentA(numbersA[idxA]);
+                    setDisplayA(numbersA[idxA]);
+                    setShowOpA(opSymbolsA[idxA - 1] || "");
                     setActiveZone('A');
                     setScaleA(0.5);
-                    setTimeout(() => setScaleA(1), 100);
+                    setTimeout(() => setScaleA(1), 150);
+                    // Sembunyikan zona B
+                    setDisplayB(null);
+                    setShowOpB("");
                 }
             } else {
                 // Zona B
                 const idxB = Math.floor(nextIdx / 2);
                 if (idxB < numbersB.length) {
-                    setCurrentB(numbersB[idxB]);
+                    setDisplayB(numbersB[idxB]);
+                    setShowOpB(opSymbolsB[idxB - 1] || "");
                     setActiveZone('B');
                     setScaleB(0.5);
-                    setTimeout(() => setScaleB(1), 100);
+                    setTimeout(() => setScaleB(1), 150);
+                    // Sembunyikan zona A
+                    setDisplayA(null);
+                    setShowOpA("");
                 }
             }
 
@@ -123,37 +144,43 @@ export default function NumberDiscoPractice() {
 
         timerRef.current = timer;
         return () => clearTimeout(timer);
-    }, [currentIndex, isLoading, isFinished, numbersA, numbersB, delay]);
+    }, [currentIndex, isLoading, isFinished, numbersA, numbersB, opSymbolsA, opSymbolsB, delay]);
 
     // === HANDLE ANSWER ===
     const handleAnswer = () => {
         if (!isFinished || isAnswered) return;
-        const val = parseFloat(inputValue);
-        if (isNaN(val)) {
-            setFeedback({ message: "⚠️ Masukkan angka!", type: "wrong" });
+
+        const valA = parseFloat(answerA);
+        const valB = parseFloat(answerB);
+
+        if (isNaN(valA) || isNaN(valB)) {
+            setFeedback({ message: "⚠️ Isi kedua kotak dengan angka!", type: "wrong" });
             return;
         }
 
-        // Jawaban yang diharapkan: jumlah seluruh angka (A + B)
+        // Jawaban yang diharapkan: total A dan total B
         const totalA = numbersA.reduce((a, b) => a + b, 0);
         const totalB = numbersB.reduce((a, b) => a + b, 0);
-        const expectedAnswer = totalA + totalB;
 
-        const correct = Math.abs(val - expectedAnswer) < 0.001;
-        setTotalCount(prev => prev + 1);
-        if (correct) {
-            setCorrectCount(prev => prev + 1);
-            setFeedback({ message: `✅ Benar! Jawaban: ${expectedAnswer}`, type: "correct" });
+        const correctA = Math.abs(valA - totalA) < 0.001;
+        const correctB = Math.abs(valB - totalB) < 0.001;
+
+        if (correctA && correctB) {
+            setFeedback({ message: `✅ Benar semua! Zona A: ${totalA}, Zona B: ${totalB}`, type: "correct" });
         } else {
-            setWrongCount(prev => prev + 1);
-            setFeedback({ message: `❌ Salah! Jawaban: ${expectedAnswer}`, type: "wrong" });
+            let msg = "❌ ";
+            if (!correctA && !correctB) msg += `Zona A: ${totalA}, Zona B: ${totalB}`;
+            else if (!correctA) msg += `Zona A salah (jawaban: ${totalA}), Zona B benar ✅`;
+            else msg += `Zona A benar ✅, Zona B salah (jawaban: ${totalB})`;
+            setFeedback({ message: msg, type: "wrong" });
         }
+
         setIsAnswered(true);
         setTimeout(() => {
             setIsNumberDisco(false);
             resetPracticeState();
             setScreen("results");
-        }, 2000);
+        }, 3000);
     };
 
     // === QUIT ===
@@ -161,23 +188,10 @@ export default function NumberDiscoPractice() {
         if (isFinished || isAnswered) {
             setShowConfirm(true);
         } else {
-            if (timerRef.current) clearTimeout(timerRef.current);
             setIsNumberDisco(false);
             resetPracticeState();
             setScreen("menu");
         }
-    };
-
-    const confirmQuit = () => {
-        setShowConfirm(false);
-        if (timerRef.current) clearTimeout(timerRef.current);
-        setIsNumberDisco(false);
-        resetPracticeState();
-        setScreen("menu");
-    };
-
-    const cancelQuit = () => {
-        setShowConfirm(false);
     };
 
     // === LOADING ===
@@ -185,58 +199,34 @@ export default function NumberDiscoPractice() {
         return (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
                 <div style={{ fontSize: 18, marginBottom: 20 }}>⏳ Memuat Number Disco...</div>
-                <div style={{ fontSize: 14, color: "#64748b" }}>Mohon tunggu sebentar</div>
             </div>
         );
     }
 
-    // === ERROR ===
     if (errorMsg) {
         return (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
                 <div style={{ fontSize: 18, marginBottom: 20, color: "#f87171" }}>⚠️ {errorMsg}</div>
-                <button
-                    className="btn btn-outline"
-                    onClick={() => {
-                        setIsNumberDisco(false);
-                        setScreen("menu");
-                    }}
-                >
-                    Kembali ke Menu
+                <button className="btn btn-outline" onClick={() => { setIsNumberDisco(false); setScreen("menu"); }}>
+                    Kembali
                 </button>
             </div>
         );
     }
 
-    // === GUARD: KALO ANGKA NULL ===
-    if (currentA === null) {
-        return (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <div style={{ fontSize: 18, marginBottom: 20, color: "#f87171" }}>⚠️ Gagal memuat angka, coba lagi.</div>
-                <button
-                    className="btn btn-outline"
-                    onClick={() => {
-                        setIsNumberDisco(false);
-                        setScreen("menu");
-                    }}
-                >
-                    Kembali ke Menu
-                </button>
-            </div>
-        );
-    }
-
-    // === RENDER ===
     return (
         <>
             <ConfirmModal
                 isOpen={showConfirm}
-                onConfirm={confirmQuit}
-                onCancel={cancelQuit}
+                onConfirm={() => {
+                    setShowConfirm(false);
+                    setIsNumberDisco(false);
+                    resetPracticeState();
+                    setScreen("menu");
+                }}
+                onCancel={() => setShowConfirm(false)}
                 title="Keluar?"
                 message="Yakin ingin keluar dari Number Disco?"
-                confirmText="Ya, Keluar"
-                cancelText="Batalkan"
             />
 
             <div className="practice-header">
@@ -244,113 +234,158 @@ export default function NumberDiscoPractice() {
                     <button className="back-btn" onClick={handleQuit}>
                         <span className="back-icon">✕</span> Keluar
                     </button>
-                    <div className="practice-stats">
-                        <span>✅ <span className="stat-value correct">{correctCount}</span></span>
-                        <span>❌ <span className="stat-value wrong">{wrongCount}</span></span>
-                        <span>📝 <span className="stat-value">{totalCount}</span></span>
-                    </div>
                 </div>
                 {!isFinished && (
                     <div style={{ fontSize: 14, color: "#94a3b8", background: "rgba(0,0,0,0.2)", padding: "4px 14px", borderRadius: 12 }}>
-                        {Math.min(currentIndex + 1, numbersA.length + numbersB.length)} / {numbersA.length + numbersB.length}
+                        {currentIndex} / {numbersA.length + numbersB.length}
                     </div>
                 )}
             </div>
 
-            <div className="question-box" style={{
-                minHeight: 300,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 20,
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '24px 16px'
-            }}>
+            <div className="question-box" style={{ minHeight: 300, display: 'flex', flexDirection: 'column', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
                 {!isFinished ? (
                     <>
                         {/* Zona A */}
                         <div style={{
                             width: '100%',
-                            padding: '16px 20px',
+                            padding: 20,
                             borderRadius: 16,
-                            background: `${colorA}20`,
+                            background: `${colorA}15`,
                             border: `3px solid ${colorA}`,
                             textAlign: 'center',
-                            transition: 'all 0.3s ease',
-                            opacity: activeZone === 'A' ? 1 : 0.4,
-                            transform: activeZone === 'A' ? 'scale(1.02)' : 'scale(1)',
+                            transition: 'all 0.3s',
+                            opacity: activeZone === 'A' ? 1 : 0.3,
+                            minHeight: 80,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 12,
                         }}>
-                            <div style={{ fontSize: 14, color: colorA, fontWeight: 600, marginBottom: 4 }}>ZONA A</div>
+                            <div style={{ fontSize: 14, color: colorA, fontWeight: 600, position: 'absolute', top: 4, left: 12 }}>
+                                ZONA A
+                            </div>
                             <div style={{
-                                fontSize: 56,
+                                fontSize: 48,
                                 fontWeight: 700,
                                 color: colorA,
                                 transform: `scale(${scaleA})`,
-                                transition: 'transform 0.15s ease-out',
-                                textShadow: activeZone === 'A' ? `0 0 40px ${colorA}40` : 'none',
+                                transition: 'transform 0.15s',
                             }}>
-                                {currentA !== null ? currentA : '?'}
+                                {displayA !== null ? displayA : '?'}
                             </div>
+                            {showOpA && (
+                                <div style={{ fontSize: 32, color: colorA, fontWeight: 600 }}>
+                                    {showOpA}
+                                </div>
+                            )}
                         </div>
 
                         {/* Zona B */}
                         <div style={{
                             width: '100%',
-                            padding: '16px 20px',
+                            padding: 20,
                             borderRadius: 16,
-                            background: `${colorB}20`,
+                            background: `${colorB}15`,
                             border: `3px solid ${colorB}`,
                             textAlign: 'center',
-                            transition: 'all 0.3s ease',
-                            opacity: activeZone === 'B' ? 1 : 0.4,
-                            transform: activeZone === 'B' ? 'scale(1.02)' : 'scale(1)',
+                            transition: 'all 0.3s',
+                            opacity: activeZone === 'B' ? 1 : 0.3,
+                            minHeight: 80,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 12,
                         }}>
-                            <div style={{ fontSize: 14, color: colorB, fontWeight: 600, marginBottom: 4 }}>ZONA B</div>
+                            <div style={{ fontSize: 14, color: colorB, fontWeight: 600, position: 'absolute', top: 4, left: 12 }}>
+                                ZONA B
+                            </div>
                             <div style={{
-                                fontSize: 56,
+                                fontSize: 48,
                                 fontWeight: 700,
                                 color: colorB,
                                 transform: `scale(${scaleB})`,
-                                transition: 'transform 0.15s ease-out',
-                                textShadow: activeZone === 'B' ? `0 0 40px ${colorB}40` : 'none',
+                                transition: 'transform 0.15s',
                             }}>
-                                {currentB !== null ? currentB : '?'}
+                                {displayB !== null ? displayB : '?'}
                             </div>
-                        </div>
-
-                        {/* Indikator progress */}
-                        <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
-                            {activeZone === 'A' ? '⬆️ Zona A aktif' : '⬇️ Zona B aktif'}
+                            {showOpB && (
+                                <div style={{ fontSize: 32, color: colorB, fontWeight: 600 }}>
+                                    {showOpB}
+                                </div>
+                            )}
                         </div>
                     </>
                 ) : (
-                    <>
-                        <div className="question-number" style={{ fontSize: 18 }}>📝 Jumlahkan semua angka!</div>
-                        <div className="question-text" style={{ fontSize: 20, color: "#94a3b8", textAlign: 'center' }}>
-                            <div style={{ color: colorA }}>Zona A: {numbersA.join(' + ')}</div>
-                            <div style={{ color: colorB, marginTop: 4 }}>Zona B: {numbersB.join(' + ')}</div>
-                            <div style={{ marginTop: 8, fontWeight: 600, color: '#fbbf24' }}>
-                                Total = ?
+                    // === FINISHED ===
+                    <div style={{ width: '100%' }}>
+                        <div className="question-number" style={{ textAlign: 'center', marginBottom: 16 }}>
+                            📝 Masukkan jawaban untuk kedua zona!
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+                            {/* Kolom Jawaban Zona A */}
+                            <div style={{ flex: 1, minWidth: 150 }}>
+                                <div style={{ fontSize: 14, color: colorA, fontWeight: 600, marginBottom: 4 }}>
+                                    Zona A:
+                                </div>
+                                <input
+                                    ref={inputARef}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={answerA}
+                                    onChange={(e) => setAnswerA(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && inputBRef.current?.focus()}
+                                    placeholder="Jawaban A"
+                                    disabled={isAnswered}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        background: 'rgba(0,0,0,0.35)',
+                                        border: `2px solid ${colorA}`,
+                                        borderRadius: 12,
+                                        color: '#e8edf5',
+                                        fontSize: 20,
+                                        fontWeight: 600,
+                                        textAlign: 'center',
+                                        outline: 'none',
+                                    }}
+                                />
+                            </div>
+
+                            {/* Kolom Jawaban Zona B */}
+                            <div style={{ flex: 1, minWidth: 150 }}>
+                                <div style={{ fontSize: 14, color: colorB, fontWeight: 600, marginBottom: 4 }}>
+                                    Zona B:
+                                </div>
+                                <input
+                                    ref={inputBRef}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={answerB}
+                                    onChange={(e) => setAnswerB(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleAnswer()}
+                                    placeholder="Jawaban B"
+                                    disabled={isAnswered}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        background: 'rgba(0,0,0,0.35)',
+                                        border: `2px solid ${colorB}`,
+                                        borderRadius: 12,
+                                        color: '#e8edf5',
+                                        fontSize: 20,
+                                        fontWeight: 600,
+                                        textAlign: 'center',
+                                        outline: 'none',
+                                    }}
+                                />
                             </div>
                         </div>
-                        <div className="answer-area" style={{ marginTop: 16, width: '100%', maxWidth: 400, display: 'flex', gap: 12 }}>
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                inputMode="decimal"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleAnswer()}
-                                placeholder="Jumlah total..."
-                                disabled={isAnswered}
-                                autoComplete="off"
-                                style={{ flex: 1, padding: '12px 16px', fontSize: 18, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff' }}
-                            />
-                            <button className="btn btn-primary" onClick={handleAnswer} disabled={isAnswered}>
-                                Kirim
-                            </button>
-                        </div>
-                    </>
+
+                        <button className="btn btn-primary" onClick={handleAnswer} disabled={isAnswered} style={{ marginTop: 16, width: '100%' }}>
+                            Kirim Jawaban
+                        </button>
+                    </div>
                 )}
             </div>
 
