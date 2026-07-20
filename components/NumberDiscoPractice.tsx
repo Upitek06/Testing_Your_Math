@@ -260,24 +260,28 @@ export default function NumberDiscoPractice() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: 12,
+                            position: 'relative',
                         }}>
                             <div style={{ fontSize: 14, color: colorA, fontWeight: 600, position: 'absolute', top: 4, left: 12 }}>
                                 ZONA A
                             </div>
-                            <div style={{
-                                fontSize: 48,
-                                fontWeight: 700,
-                                color: colorA,
-                                transform: `scale(${scaleA})`,
-                                transition: 'transform 0.15s',
-                            }}>
-                                {displayA !== null ? displayA : '?'}
-                            </div>
-                            {showOpA && (
-                                <div style={{ fontSize: 32, color: colorA, fontWeight: 600 }}>
-                                    {showOpA}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {/* 🔥 OPERASI DI KIRI ANGKA */}
+                                {showOpA && (
+                                    <div style={{ fontSize: 40, color: colorA, fontWeight: 700 }}>
+                                        {showOpA}
+                                    </div>
+                                )}
+                                <div style={{
+                                    fontSize: 48,
+                                    fontWeight: 700,
+                                    color: colorA,
+                                    transform: `scale(${scaleA})`,
+                                    transition: 'transform 0.15s',
+                                }}>
+                                    {displayA !== null ? displayA : '?'}
                                 </div>
-                            )}
+                            </div>
                         </div>
 
                         {/* Zona B */}
@@ -295,24 +299,28 @@ export default function NumberDiscoPractice() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: 12,
+                            position: 'relative',
                         }}>
                             <div style={{ fontSize: 14, color: colorB, fontWeight: 600, position: 'absolute', top: 4, left: 12 }}>
                                 ZONA B
                             </div>
-                            <div style={{
-                                fontSize: 48,
-                                fontWeight: 700,
-                                color: colorB,
-                                transform: `scale(${scaleB})`,
-                                transition: 'transform 0.15s',
-                            }}>
-                                {displayB !== null ? displayB : '?'}
-                            </div>
-                            {showOpB && (
-                                <div style={{ fontSize: 32, color: colorB, fontWeight: 600 }}>
-                                    {showOpB}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {/* 🔥 OPERASI DI KIRI ANGKA */}
+                                {showOpB && (
+                                    <div style={{ fontSize: 40, color: colorB, fontWeight: 700 }}>
+                                        {showOpB}
+                                    </div>
+                                )}
+                                <div style={{
+                                    fontSize: 48,
+                                    fontWeight: 700,
+                                    color: colorB,
+                                    transform: `scale(${scaleB})`,
+                                    transition: 'transform 0.15s',
+                                }}>
+                                    {displayB !== null ? displayB : '?'}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </>
                 ) : (
