@@ -245,7 +245,7 @@ export default function NumberDiscoPractice() {
             <div className="question-box" style={{ minHeight: 300, display: 'flex', flexDirection: 'column', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
                 {!isFinished ? (
                     <>
-                        {/* Zona A */}
+                        {/* ZONA A */}
                         <div style={{
                             width: '100%',
                             padding: 20,
@@ -266,7 +266,7 @@ export default function NumberDiscoPractice() {
                                 ZONA A
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {/* 🔥 OPERASI DI KIRI ANGKA */}
+                                {/* 🔥 OPERASI DI KIRI (hanya muncul kalau ada operasi) */}
                                 {showOpA && (
                                     <div style={{ fontSize: 40, color: colorA, fontWeight: 700 }}>
                                         {showOpA}
@@ -284,7 +284,7 @@ export default function NumberDiscoPractice() {
                             </div>
                         </div>
 
-                        {/* Zona B */}
+                        {/* ZONA B */}
                         <div style={{
                             width: '100%',
                             padding: 20,
@@ -305,7 +305,7 @@ export default function NumberDiscoPractice() {
                                 ZONA B
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {/* 🔥 OPERASI DI KIRI ANGKA */}
+                                {/* 🔥 OPERASI DI KIRI (hanya muncul kalau ada operasi) */}
                                 {showOpB && (
                                     <div style={{ fontSize: 40, color: colorB, fontWeight: 700 }}>
                                         {showOpB}
